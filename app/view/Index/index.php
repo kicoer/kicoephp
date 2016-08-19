@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>...</title>
+	<title>Link Start~</title>
+	<link rel="stylesheet" type="text/css" href="/static/css/index.css">
 </head>
 <body>
-Test
+	<div class="index">
+		<span>以下开始测试这个框架的各方各面啦</span>
+	</div>
 </body>
 </html>

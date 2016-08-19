@@ -29,7 +29,7 @@
 
 ***把页面链接指向`index.php?k=` nginx配置如下：***
 首先是开启pathinfo，检查php.ini中cgi.fix_pathinfo=0;
-```json
+```
 location ~ \.php {
       fastcgi_split_path_info ^(.+\.php)(.*)$;
       fastcgi_param PATH_INFO $fastcgi_path_info;
@@ -39,7 +39,7 @@ location ~ \.php {
 ```
 然后是路由跳转
 
-```json
+```
 location / {
 	...//原来的代码
     if (!-e $request_filename) {
