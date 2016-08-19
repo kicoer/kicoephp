@@ -6,27 +6,34 @@ use \kicoe\Core\Resource;
 
 class View
 {
-	protected $variables = array();
 
-	/** 分配变量 **/
-    function assign($name, $value)
+    protected static $instance;    //视图实例
+
+    //获取视图实例
+    public static function getInstance()
     {
-        $this->variables[$name] = $value;
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
     }
 
-    function fetch()
+    /**
+     * 展示页面
+     * @param string $path 自定义加载路径
+     */
+    public function show($path,$variables)
     {
-    	//将数组直接解析成变量。。。
-    	extract($this->variables);
-
-    	//获取控制器和操作名
+        extract($variables);
+    	// 获取控制器和操作名
     	$controller = Resource::getInstance()->controller;
     	$action = Resource::getInstance()->action;
-    	if (file_exists(APP_PATH.'view//'.$controller.'/'.$action.'.php')) {
-    		//加载视图文件 /app/view/控制器名/操作名.php
-    		include APP_PATH.'view//'.$controller.'/'.$action.'.php';
+    	if ($path!='' && file_exists(APP_PATH.'view/'.$path.'.php')) {
+            // 加载用户自定义视图路径
+            include APP_PATH.'view/'.$path.'.php';
     	} else {
-    		exit($controller.'/'.$action.'.php 视图不存在');
+    		// 加载视图文件 /app/view/控制器名/操作名.php
+            include APP_PATH.'view/'.$controller.'/'.$action.'.php';
     	}
 
     }

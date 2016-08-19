@@ -4,7 +4,6 @@
 // 初始化常量
 defined('CORE_PATH') or define('CORE_PATH', __DIR__.'/');	//框架核心目录
 defined('APP_PATH') or define('APP_PATH', dirname($_SERVER['SCRIPT_FILENAME']).'/');	//应用目录
-defined('WEB_URL') or define('WEB_URL', 'http://moonprism/');
 
 //注册自动加载
 require CORE_PATH . 'AutoLoad.php';

@@ -4,11 +4,13 @@ namespace kicoe\Core;
 use \kicoe\Core\Config;
 use \PDO;
 
-/*
-* 原来和Model还是得分开，一个用单例一个给继承
-*/
+/**
+ * Db数据库链接的单例
+ * 
+ */
 class Db
 {
+	//自身实例
 	private static $instance;
 
 	public static function connect()
@@ -25,4 +27,5 @@ class Db
 	    }
 	    return self::$instance;
 	}
+
 }
