@@ -3,6 +3,7 @@
 namespace kicoe\Core;
 
 use \kicoe\Core\Resource;
+use \kicoe\Core\Exception;
 
 class View
 {
@@ -28,12 +29,21 @@ class View
     	// 获取控制器和操作名
     	$controller = Resource::getInstance()->controller;
     	$action = Resource::getInstance()->action;
-    	if ($path!='' && file_exists(APP_PATH.'view/'.$path.'.php')) {
-            // 加载用户自定义视图路径
-            include APP_PATH.'view/'.$path.'.php';
+    	if ($path!='') {
+            if (file_exists(APP_PATH.'view/'.$path.'.php')) {
+                // 加载用户自定义视图路径
+                include APP_PATH.'view/'.$path.'.php';
+            } else {
+                throw new Exception('视图路径错误',$path.' 视图路径未找到');
+            }
+
     	} else {
-    		// 加载视图文件 /app/view/控制器名/操作名.php
-            include APP_PATH.'view/'.$controller.'/'.$action.'.php';
+            if (file_exists(APP_PATH.'view/'.$controller.'/'.$action.'.php')) {
+                // 加载视图文件 /app/view/控制器名/操作名.php
+                include APP_PATH.'view/'.$controller.'/'.$action.'.php';
+            } else {
+                throw new Exception('视图路径错误',$controller.'/'.$action.' 默认视图路径未找到');
+            }
     	}
 
     }

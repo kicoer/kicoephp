@@ -3,7 +3,7 @@
 namespace kicoe\Core;
 
 use \kicoe\Core\Resource;
-use \kicoe\Core\Resource;
+use \kicoe\Core\Exception;
 
 class Link
 {

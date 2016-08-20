@@ -4,7 +4,7 @@ namespace app\model;
 use \kicoe\Core\Model;
 
 /**
-* user表的模型类,表名和类名必须一致
+* user表的模型类
 */
 class User extends Model
 {
