@@ -1,13 +1,14 @@
 ﻿# kicoephp
 
 ## 关于
-超级小巧简单的MVC php框架，用来搭博客的
+超级小巧简单的phpMVC框架，用来搭博客的
 
 配置：
 
 * php >= 5.3
 * PDO
 * nginx
+
 ## 结构
 ```
 -app/
