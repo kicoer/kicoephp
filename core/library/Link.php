@@ -35,7 +35,7 @@ class Link
 			// 实例化控制器,传入控制器和操作
 			$controllerPoi = new $controller();
 		} else {
-			exit($controllerName . "控制器不存在");
+			throw new Exception("路由错误",$controllerName . " 控制器不存在");
 		}
         // 如果控制器和动作存在，这调用并传入URL参数
         if ((int)method_exists($controllerPoi, $action)) {
@@ -43,7 +43,7 @@ class Link
             Resource::getInstance()->action = $action;
         	call_user_func_array(array($controllerPoi,$action),$queryString);
         } else {
-            exit($action . "操作不存在");
+            throw new Exception("路由错误",$action . " 操作不存在");
         }
     }
 } 

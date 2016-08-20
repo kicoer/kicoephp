@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
 	<title>Link Start~</title>
 	<link rel="stylesheet" type="text/css" href="/static/css/index.css">
 </head>

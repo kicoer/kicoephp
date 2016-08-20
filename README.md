@@ -1,45 +1,32 @@
 ﻿# kicoephp
 
 ## 关于
-超级小巧简单的MVC php框架
-直接把psr-4自动加载官方例子照搬了。。。反正用来学习的
+超级小巧简单的MVC php框架，用来搭博客的
 
 配置：
+
 * php >= 5.3
 * PDO
-
+* nginx
 ## 结构
-
 ```
 -app/
-	-controller/
-    -model/
-    -view/
-    -config.php
+	-controller/    控制器
+    -model/         模型
+    -view/          视图
+    -config.php     配置文件
 -core/
-	-library/
+	-library/       框架核心库
     -AutoLoad.php
-    -load.php
+    -load.php       框架加载文件
 -public/
 	-static/
-    -index.php  入口文件
+    -index.php      入口文件
 ```
 和普通MVC没什么太大区别
-
-## 路由
-
-***把页面链接指向`index.php?k=` nginx配置如下：***
-首先是开启pathinfo，检查php.ini中cgi.fix_pathinfo=0;
-```
-location ~ \.php {
-      fastcgi_split_path_info ^(.+\.php)(.*)$;
-      fastcgi_param PATH_INFO $fastcgi_path_info;
-      ...
-}
-
-```
-然后是路由跳转
-
+## 使用
+#### nginx
+把页面链接指向`index.php?k=`，nginx配置如下：
 ```
 location / {
 	...//原来的代码
@@ -49,38 +36,26 @@ location / {
     }
 }
 ```
-
-## 使用
-
-首先是controller里是控制器,类名和文件名一致，必要继承核心类中的Controller
+再将网站的根目录设置为public文件夹路径
+#### 配置文件
+位于app目录下的 `config.php` 填上自己的数据库配置吧
 ```php
-<?php
-namespace app\controller;
-
-use \kicoe\Core\Controller;
-
-class Index extends Controller
-{
-	public function index()
-	{
-		$this->show();
-	}
-}
+return [
+	//数据库配置
+	'db' => [
+		// 服务器地址
+	    'hostname'    => 'localhost',
+	    // 数据库名
+	    'database'    => '',
+	    // 数据库用户名
+	    'username'    => '',
+	    // 数据库密码
+	    'password'    => ''
+	]
+];
 ```
-控制器命名空间都为 `app\controller` 
-核心库命名空间为 `\kicoe\Core\...`
-Controller有一般MVC都有的*show()*函数自动加载位于 **/app/view/控制器/操作名.php** 的视图,或者也可以在show()中指定
-```php
-$this->show(love/live);     //加载view中love/live.php视图文件
-```
-也可以通过
-```php
-$this->assign('a','123');   //这样就可以在页面中使用$a变量了
-//同样支持直接传入键值对数组,因为本来就是用extract()解析的--|
-$this->assign(['a'=>123,'b'=>234]);
-```
----
-####查询构造（要优雅
+#### M  （模型）
+首先来看看查询构造器
 ```php
 <?php
 namespace app\controller;
@@ -92,10 +67,14 @@ class Index extends Controller
 {
 	public function index()
 	{
-	    //这里返回的是'username'为kicoe的字段数据
-		Query::table('user')->where('username','kicoe')->select();
 		//这里向user表插入数据
 		Query::table('user')->insert([['username'=>'ll','password'=>'***'],]);
+		//这里是向user表删除数据
+		Query::table('user')->where('username','=','kicoe')->delete();
+	    //这里查找user表中'username'为kicoe的字段数据中id的值
+		Query::table('user')->where('username','kicoe')->select('id');
+		//这里修改user表中所有id小于10的statu字段为0
+		Query::table('user')->where('id','<','10')->update(['statu'=>0]);
 	}
 }
 ```

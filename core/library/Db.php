@@ -2,6 +2,7 @@
 namespace kicoe\Core;
 
 use \kicoe\Core\Config;
+use \kicoe\Core\Exception;
 use \PDO;
 
 /**
@@ -22,7 +23,7 @@ class Db
 	            $dsn = sprintf("mysql:host=%s;dbname=%s;charset=utf8", $db_config['hostname'], $db_config['database']);
 	            self::$instance = new PDO($dsn, $db_config['username'], $db_config['password'], array(PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
 	        } catch (PDOException $e) {
-	            exit('PDO错误: ' . $e->getMessage());
+	            
 	        }
 	    }
 	    return self::$instance;

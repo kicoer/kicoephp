@@ -2,6 +2,7 @@
 namespace kicoe\Core;
 
 use \kicoe\Core\Db;
+use \kicoe\Core\Exception;
 
 /**
 * 数据库的查询构造器
@@ -19,7 +20,6 @@ class Query
 	private $table;
 	//保存的where数据
 	private $where;
-	//保存的
 
 	private function __construct(){}
 	/**
@@ -82,7 +82,7 @@ class Query
 		} else {
 			$this->statement = sprintf("%s from `%s` ",$select,$this->table).$this->where;
 		}
-		return $this->query();
+		return $this->query('array');
 	}
 
 	/**
@@ -97,7 +97,7 @@ class Query
 		} else {
 			$this->statement = sprintf("delete from `%s` ",$this->table).$this->where;
 		}
-		return $this->execu();
+		return $this->query('line');
 	}
 
 	/**
@@ -116,7 +116,7 @@ class Query
 		}
 		$insert = sprintf("(%s) values (%s)", implode(',', $begin), implode(',', $end));
 		$this->statement = sprintf("insert into %s %s", $this->table, $insert);
-		return $this->execu();
+		return $this->query('line');
 	}
 
 	/**
@@ -136,27 +136,29 @@ class Query
         } else {
         	$this->statement = sprintf("update `%s` set %s ",$this->table,$update).$this->where;
         }
-        return $this->execu();
+        return $this->query('line');
 	}
 
 	/**
 	 * 执行查询语句,返回查询结果数组
+	 * @param string $type 需要返回的结果类型
 	 */
-	public function query()
+	public function query($type)
 	{
 		$sta = $this->db_instance->prepare($this->statement);
         $sta->execute();
-        return $sta->fetch();
-	}
-
-	/**
-	 * 执行操作、判断 语句，返回受影响行数
-	 */
-	public function execu()
-	{
-		$sta = $this->db_instance->prepare($this->statement);
-        $sta->execute();
-        return $sta->rowCount();
+        if ($sta->errorCode() != '00000') {
+        	# 进行错误处理
+        	throw new Exception("数据库执行错误", implode('<br>',$sta->errorInfo()));
+        }
+        switch ($type) {
+        	case 'array':
+        		return $sta->fetch();
+        		break;
+        	case 'line':
+        		return $sta->rowCount();
+        		break;
+        }
 	}
 
 }
