@@ -7,7 +7,6 @@
 
 * php >= 5.3
 * PDO
-* nginx
 
 ## 结构
 ```
@@ -69,12 +68,12 @@ class Index extends Controller
 	public function index()
 	{
 		//这里向user表插入数据
-		Query::table('user')->insert([['username'=>'ll','password'=>'***'],]);
+		Query::table('user')->insert(['username'=>'ll','password'=>'***']);
 		//这里是向user表删除数据
 		Query::table('user')->where('username','=','kicoe')->delete();
 	    //这里查找user表中'username'为kicoe的字段数据中id的值
 		Query::table('user')->where('username','kicoe')->select('id');
-		//这里修改user表中所有id小于10的statu字段为0
+		//这里修改user表中所有id小于10的statu字段为0,orwhere()也可以的哦
 		Query::table('user')->where('id','<','10')->update(['statu'=>0]);
 	}
 }
