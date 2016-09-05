@@ -7,8 +7,6 @@ defined('APP_PATH') or define('APP_PATH', dirname($_SERVER['SCRIPT_FILENAME']).'
 
 //注册自动加载
 require CORE_PATH . 'AutoLoad.php';
-$core = new \kicoe\AutoLoad;	//自动加载类实例
-$core->register();	//注册自动加载
 
 //注册错误和异常处理
 \kicoe\Core\Error::register();
