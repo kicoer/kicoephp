@@ -2,7 +2,7 @@
 //视图类
 namespace kicoe\Core;
 
-use \kicoe\Core\Resource;
+use \kicoe\Core\Request;
 use \kicoe\Core\Exception;
 
 class View
@@ -27,8 +27,8 @@ class View
     {
         extract($variables);
     	// 获取控制器和操作名
-    	$controller = Resource::getInstance()->controller;
-    	$action = Resource::getInstance()->action;
+    	$controller = Request::getInstance()->getController();
+    	$action = Request::getInstance()->getAction();
     	if ($path!='') {
             if (file_exists(APP_PATH.'view/'.$path.'.php')) {
                 // 加载用户自定义视图路径
