@@ -111,7 +111,7 @@ class Query
 		} else {
 			$this->statement = sprintf("%s from `%s` ", $select, $this->table).$this->where;
 		}
-		return $this->bind_prpr()->fetch();
+		return $this->bind_prpr()->fetchAll();
 	}
 
 	/**
@@ -151,6 +151,7 @@ class Query
 	/**
 	 * 更新数据
 	 * @param array $data 要修改的键值对数组
+	 * @return 影响行数
 	 */
 	public function update($data)
 	{
@@ -172,6 +173,60 @@ class Query
 	}
 
 	/**
+	 * 自定义查询，支持参数绑定
+	 * @param string $my_statement 自定义查询语句
+	 * @param array $bind_arg 参数绑定数组
+	 * @return 返回查询结果数组
+	 */
+	public static function query($my_statement,$bind_arg = NULL)
+	{
+        //获取数据库连接实例
+        $db_instance = Db::connect();
+		$sta = $db_instance->prepare($my_statement);
+		if (!is_null($bind_arg)) {
+			foreach ($bind_arg as $key => $value) {
+				if (is_numeric($key)) {
+					$key++;
+				}
+				$sta->bindValue($key,$value);
+			}
+		}
+		$sta->execute();
+        if ($sta->errorCode() != '00000') {
+        	# 进行错误处理
+        	throw new Exception("数据库执行错误", implode('<br>',$sta->errorInfo()));
+        }
+		return $sta->fetchAll();
+	}
+
+	/**
+	 * 自定义查询，支持参数绑定
+	 * @param string $my_statement 自定义查询语句
+	 * @param array $bind_arg 参数绑定数组
+	 * @return 返回影响行数
+	 */
+	public static function execute($my_statement,$bind_arg = NULL)
+	{
+        //获取数据库连接实例
+        $db_instance = Db::connect();
+		$sta = $db_instance->prepare($my_statement);
+		if (!is_null($bind_arg)) {
+			foreach ($bind_arg as $key => $value) {
+				if (is_numeric($key)) {
+					$key++;
+				}
+				$sta->bindValue($key,$value);
+			}
+		}
+		$sta->execute();
+		if ($sta->errorCode() != '00000') {
+        	# 进行错误处理
+        	throw new Exception("数据库执行错误", implode('<br>',$sta->errorInfo()));
+        }
+		return $sta->rowCount();
+	}
+
+	/**
 	 * 执行参数绑定
 	 * @return PDO 查询结果后对象实例
 	 */
@@ -184,10 +239,6 @@ class Query
 				$sta->bindValue($key,$value);
 			}
 		}
-		print_r($this->Pdo_bind_data);
-		echo "<br>";
-		print_r($this->statement);
-				echo "<br>";
         $sta->execute();
         if ($sta->errorCode() != '00000') {
         	# 进行错误处理

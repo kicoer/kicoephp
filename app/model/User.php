@@ -8,11 +8,9 @@ use \kicoe\Core\Model;
 */
 class User extends Model
 {
-
-	//判断当前用户表是否为空
-	public function isNull()
+	public function __construct()
 	{
-		return $this->selectAll()? False : True;
+		// 添加表前缀
+		$this->table = "ex_user";
 	}
-	
 }
