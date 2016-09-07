@@ -15,8 +15,8 @@ class Exception extends \Exception
     	<style>
     		*{ font-family: "Microsoft Yahei"; }
     		.er { width:400px;margin:40px auto; }
-    		.er div span{ display:block; padding:2px 10px; background-color:#ccc; }
-    		.er div p{ padding:5px; }
+    		.er div span{ display:block; padding:2px 10px; font-size:13px; color:#FF4040; background-color:#CCCCCC; box-shadow: 1px 1px 1px #CCCCCC; }
+    		.er div p{ padding:5px 10px; }
     	</style>
     	</head>
     	<body>

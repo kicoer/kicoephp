@@ -16,6 +16,10 @@ class Request
 
 	private $_action;
 
+	private $get;
+
+	private $post;
+
 	private function __construct(){}
 
 	/**
@@ -79,5 +83,45 @@ class Request
 	public function getAction()
 	{
 		return $this->_action;
+	}
+
+	/**
+	 * 获取_GET中数据
+	 * @param string $index _GET数组下标
+	 * @return _GET中对应数据
+	 */
+	public function get($index)
+	{
+		if (!isset($this->get[$index])) {
+			if (!isset($_GET[$index])) {
+				throw new Exception("GET数据错误",$index . " 参数不存在");
+			}
+			if (!get_magic_quotes_gpc()) {
+				$this->get[$index] = addslashes($_GET[$index]);
+			} else {
+				$this->get[$index] = $_GET[$index];
+			}
+		}
+		return $this->get[$index];
+	}
+
+	/**
+	 * 获取_POST中数据
+	 * @param string $index _POST数组下标
+	 * @return _POST中对应数据
+	 */
+	public function post($index)
+	{
+		if (!isset($this->post[$index])) {
+			if (!isset($_POST[$index])) {
+				throw new Exception("POST数据错误",$index . " 参数不存在");
+			}
+			if (!get_magic_quotes_gpc()) {
+				$this->post[$index] = addslashes($_POST[$index]);
+			} else {
+				$this->post[$index] = $_POST[$index];
+			}
+		}
+		return $this->post[$index];
 	}
 }

@@ -1,4 +1,4 @@
-﻿# kicoephp
+# kicoephp
 
 ## 关于
 超级小巧简单的phpMVC框架，用来搭博客的
@@ -67,21 +67,129 @@ class Index extends Controller
 {
 	public function index()
 	{
-		//这里向user表插入数据
+		// 这里向user表插入数据
 		Query::table('user')->insert(['username'=>'ll','password'=>'***']);
-		//这里是向user表删除数据
+		// 这里是向user表删除数据
 		Query::table('user')->where('username','=','kicoe')->delete();
-	    //这里查找user表中'username'为kicoe的字段数据中id的值
+	    // 这里查找user表中'username'为kicoe的字段数据中id的值
 		Query::table('user')->where('username','kicoe')->select('id');
-		//这里修改user表中所有id小于10的statu字段为0,orwhere()也可以的哦
+		// 这里修改user表中所有id小于10的statu字段为0,orwhere()也可以的哦
 		Query::table('user')->where('id','<','10')->update(['statu'=>0]);
 	}
 }
 ```
 和优雅的laravel好像。。。
- 
+首先定义模型于 `app/model/User.php`
+```php
+<?php
+namespace app\model;
 
- 
+use \kicoe\Core\Model;
+
+/**
+* user表的模型类
+*/
+class User extends Model
+{
+	public function __construct()
+	{
+		// 可以自定义表名，或默认为类名小写
+		$this->table = "ex_user";
+	}
+}
+```
+关于模型的用法
+```php
+<?php
+namespace app\controller;
+
+use \kicoe\Core\Controller;
+use \app\model\User;
+class Index extends Controller
+{
+	public function index()
+	{
+		// 获取ORM对象
+		$user = new User;
+		// 获取id为2的数据，注意get需要用来获取主键
+		$user->get(['id'=>2]);
+		// 可以查询到获取该列的其他数据
+		echo $user->name;
+		// 也可以直接给对象属性赋值后执行insert()插入数据
+		$user->name = 'kicoe';
+		$user->password = sha1('pa');
+		$user->insert();
+		// 当然insert传入参数后可以构造查询
+		$user->insert(['name','passwd'], ['kicoe',sha1('pa')], ['poi',sha1('pom')]);
+		// 使用set构造where
+		$user->set(['id','<',10], 'or', ['name','kicoe'], ['password',sha1('pa')]);
+		// update更新数据
+		$user->update(['name'=>'k']);
+		// select查询数据,默认查询所有
+		$user->select('name');
+		// delete删除数据，未使用set / get构造查询条件则会删除所有
+		$user->delete();
+	}
+}
+```
+模型与查询构造器都可以使用
+```php
+// 自定义查询
+query('select * from user where id = ?',[$id]);
+// 自定义执行
+execute('select * from user where id = ?',[$id]);
+```
+#### V  （视图）
+在 `app/view` 中定义 `Controller/action.php`
+写php就可以了
+#### C  （控制器）
+以上模型的例子里就用到了控制器，定义在`app/controller`中，控制器名大写且与类名一致
+显示视图时可以使用
+```php
+<?php
+namespace app\controller;
+
+use \kicoe\Core\Controller;
+
+class Index extends Controller
+{
+	public function index()
+	{
+		// 默认显示视图app/view/Index/index.php
+		$this->show();
+		// 当然也可以自定义，位于app/view/a/b.php
+		$this->show('a/b');
+	}
+}
+```
+#### 关于Session和提交数据post get的操作
+```php
+<?php
+namespace app\controller;
+
+use \kicoe\Core\Controller;
+use \kicoe\Core\Request;
+use \kicoe\Core\Session;
+
+class Index extends Controller
+{
+	public function index()
+	{
+		$request = Request::getInstance();
+		// 获取用户post提交的name数据
+		$name = $request->post('name');
+		// session操作
+		Session::set('name','kicoe');
+		if (Session::has('name')) {
+			echo Session::get('name');
+		}
+	}
+}
+```
+## 完结撒花
+花了一些时间，终于把这个小小的框架写好了，自己用用就好
+
+嗯，就是这样
 
 
 
