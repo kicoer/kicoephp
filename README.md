@@ -134,6 +134,9 @@ class Index extends Controller
 ```
 模型与查询构造器都可以使用
 ```php
+// 构造order by与limit
+order('列名','desc / asc');
+limit($i,$n);
 // 自定义查询
 query('select * from user where id = ?',[$id]);
 // 自定义执行

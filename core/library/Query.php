@@ -10,20 +10,24 @@ use \kicoe\Core\Exception;
 */
 class Query
 {
-	//自身实例
-	private static $instance;
-	//数据库连接实例
+	// 单例
+	private static $instance; 
+	// 数据库连接实例
 	private $db_instance;
-	//构造的查询语句
+	// 构造的查询语句
 	private $statement;
-	//保存的表名
+	// 保存的表名
 	private $table;
-	//保存的where数据
+	// 保存的where数据
 	private $where;
-	//保存的pdo参数绑定数据
+	// 保存的pdo参数绑定数据
 	private $Pdo_bind_data = array();
-	//保存的pdo参数绑定计数
+	// 保存的pdo参数绑定计数
 	private $Pdo_bind_count;
+	// 保存的order by语句
+	private $Order_by;
+	// 保存的LIMIT语句
+	private $limit;
 
 	private function __construct(){}
 	/**
@@ -38,7 +42,9 @@ class Query
         }
         self::$instance->statement = '';
         self::$instance->table = $tablename;
-        self::$instance->where = null;
+        self::$instance->where = '';
+        self::$instance->Order_by = '';
+        self::$instance->limit = '';
         self::$instance->Pdo_bind_data = array();
         self::$instance->Pdo_bind_count = 0;
         return self::$instance;
@@ -51,7 +57,7 @@ class Query
 	 */
 	public function where($arg1, $arg2, $arg3 = False)
 	{
-		if (is_null($this->where)) {
+		if ($this->where == '') {
 			$start_where = 'where ';
 		} else {
 			$start_where = ' and ';
@@ -75,7 +81,7 @@ class Query
 	 */
 	public function orwhere($arg1, $arg2, $arg3 = False)
 	{
-		if (is_null($this->where)) {
+		if ($this->where == '') {
 			$start_where = 'where ';
 		} else {
 			$start_where = ' or ';
@@ -94,6 +100,40 @@ class Query
 	}
 
 	/**
+	 * 构造order by语句
+	 * @param string $by 要排序的列
+	 * @param string $type asc/desc 排序手段
+	 */
+	public function order($by, $type = 'asc')
+	{
+		$type = strtolower($type);
+		if ($type == 'asc' || $type == 'desc') {
+			if ($this->Order_by == '') {
+				$this->Order_by = 'order by '.$by.' '.$type;
+			} else {
+				$this->Order_by .= (', '.$by.' '.$type);
+			}
+		}
+		return $this;
+	}
+
+	/**
+	 * 构造limit语句
+	 * @param string $index 要开始的位置
+	 * @param string $number 要获取的数量
+	 */
+	public function limit($index, $number)
+	{
+		$this->Pdo_bind_count++;
+		$this->limit = ' limit :li'.$this->Pdo_bind_count;
+		$this->Pdo_bind_data[':li'.$this->Pdo_bind_count] = $index;
+		$this->Pdo_bind_count++;
+		$this->limit .= (',:li'.$this->Pdo_bind_count);
+		$this->Pdo_bind_data[':li'.$this->Pdo_bind_count] = $number;
+		return $this;
+	}
+
+	/**
 	 * 从当前条件查询语句
 	 * @param string $data 要查询的条目。不是数组的话查询这一个
 	 * @return 数组
@@ -106,11 +146,7 @@ class Query
 		} else {
 			$select = "select ".$data;
 		}
-		if (is_null($this->where)) {
-			$this->statement = sprintf("%s from `%s` ", $select, $this->table);
-		} else {
-			$this->statement = sprintf("%s from `%s` ", $select, $this->table).$this->where;
-		}
+		$this->statement = sprintf("%s from `%s` ", $select, $this->table).$this->where.$this->Order_by.$this->limit;
 		return $this->bind_prpr()->fetchAll();
 	}
 
@@ -120,12 +156,8 @@ class Query
 	 */
 	public function delete()
 	{
-		if (is_null($this->where)) {
-			//没有执行where就delete,则删除全部表。。。天啊真可怕
-			$this->statement = sprintf("delete from `%s` ", $this->table);
-		} else {
-			$this->statement = sprintf("delete from `%s` ", $this->table).$this->where;
-		}
+		//没有执行where就delete,则删除全部表。。。天啊真可怕
+		$this->statement = sprintf("delete from `%s` ", $this->table).$this->where.$this->Order_by.$this->limit;
         return $this->bind_prpr()->rowCount();
 	}
 
@@ -162,13 +194,8 @@ class Query
             $this->Pdo_bind_data[':up'.$this->Pdo_bind_count] = $value;
         }
         $update = implode(',', $fields);
-        if (is_null($this->where)) {
-        	# 没有where的话,修改所有数据
-        	$this->statement = sprintf("update `%s` set %s ",$this->table,$update);
-        } else {
-        	$this->statement = sprintf("update `%s` set %s ",$this->table,$update).$this->where;
-        }
-
+    	# 没有where的话,修改所有数据
+    	$this->statement = sprintf("update `%s` set %s ",$this->table,$update).$this->where.$this->Order_by.$this->limit;
         return $this->bind_prpr()->rowCount();
 	}
 
@@ -232,11 +259,18 @@ class Query
 	 */
 	private function bind_prpr()
 	{
+		echo "$this->statement <br>";
+		print_r($this->Pdo_bind_data);
+		echo "<br>";
 		$sta = $this->db_instance->prepare($this->statement);
 		if (count($this->Pdo_bind_data)) {
 			foreach ($this->Pdo_bind_data as $key => $value) {
-				//原来bindParam会绑定变量而不是值，害的我差点以为要用到闭包
-				$sta->bindValue($key,$value);
+				if (is_numeric($value)) {
+					$sta->bindValue($key,$value,\PDO::PARAM_INT);
+				} else {
+					//原来bindParam会绑定变量而不是值，害的我差点以为要用到闭包
+					$sta->bindValue($key,$value);
+				}
 			}
 		}
         $sta->execute();

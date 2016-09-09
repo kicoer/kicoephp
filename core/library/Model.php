@@ -19,11 +19,15 @@ class Model
     // 查询与操作数据
     protected $_data = array();
     // where语句
-    protected $where;
+    protected $where = '';
+    // 保存的order by语句
+    private $Order_by = '';
+    // 保存的LIMIT语句
+    private $limit = '';
     // 保存的pdo参数绑定数据
     private $Pdo_bind_data = array();
     // 保存的pdo参数绑定计数
-    private $Pdo_bind_count;
+    private $Pdo_bind_count = 0;
 
     /**
      * 执行初始化操作
@@ -49,8 +53,9 @@ class Model
         if (is_null($this->db_instance)) {
             $this->_init();
         }
+        $this->Order_by = '';
+        $this->limit = '';
         $this->statement = 'select * from '.$this->table;
-        $this->where = ' where ';
         $this->Pdo_bind_data = array();
         $this->Pdo_bind_count = 0;
         $creat_where = '';
@@ -63,7 +68,7 @@ class Model
             }
             $this->Pdo_bind_data[':wh'.$this->Pdo_bind_count] = $value;
         }
-        $this->where.=$creat_where;
+        $this->where = ($creat_where == '') ? '' : ' where '.$creat_where;
         $this->statement.=$this->where;
         $this->_data = $this->bind_prpr()->fetch();
         return $this;
@@ -78,6 +83,8 @@ class Model
         if (is_null($this->db_instance)) {
             $this->_init();
         }
+        $this->Order_by = '';
+        $this->limit = '';
         $this->where = '';
         $this->Pdo_bind_data = array();
         $this->Pdo_bind_count = 0;
@@ -118,6 +125,40 @@ class Model
             }
             $this->where .= ($start_where.$creat_where);
         }
+        return $this;
+    }
+
+    /**
+     * 构造order by语句
+     * @param string $by 要排序的列
+     * @param string $type asc/desc 排序手段
+     */
+    public function order($by, $type = 'asc')
+    {
+        $type = strtolower($type);
+        if ($type == 'asc' || $type == 'desc') {
+            if ($this->Order_by == '') {
+                $this->Order_by = ' order by '.$by.' '.$type;
+            } else {
+                $this->Order_by .= (', '.$by.' '.$type);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * 构造limit语句
+     * @param string $index 要开始的位置
+     * @param string $number 要获取的数量
+     */
+    public function limit($index, $number)
+    {
+        $this->Pdo_bind_count++;
+        $this->limit = ' limit :li'.$this->Pdo_bind_count;
+        $this->Pdo_bind_data[':li'.$this->Pdo_bind_count] = $index;
+        $this->Pdo_bind_count++;
+        $this->limit .= (',:li'.$this->Pdo_bind_count);
+        $this->Pdo_bind_data[':li'.$this->Pdo_bind_count] = $number;
         return $this;
     }
 
@@ -180,13 +221,8 @@ class Model
             $this->Pdo_bind_data[':up'.$this->Pdo_bind_count] = $value;
         }
         $update = implode(',', $fields);
-        if (is_null($this->where)) {
-            # 没有where的话,修改所有数据
-            $this->statement = sprintf("update `%s` set %s ",$this->table,$update);
-        } else {
-            $this->statement = sprintf("update `%s` set %s ",$this->table,$update).$this->where;
-        }
-
+        # 没有where的话,修改所有数据
+        $this->statement = sprintf("update `%s` set %s ",$this->table,$update).$this->where.$this->Order_by.$this->limit;
         return $this->bind_prpr()->rowCount();
     }
 
@@ -203,11 +239,7 @@ class Model
         } else {
             $select = "select ".$data;
         }
-        if (is_null($this->where)) {
-            $this->statement = sprintf("%s from `%s` ", $select, $this->table);
-        } else {
-            $this->statement = sprintf("%s from `%s` ", $select, $this->table).$this->where;
-        }
+        $this->statement = sprintf("%s from `%s` ", $select, $this->table).$this->where.$this->Order_by.$this->limit;
         return $this->bind_prpr()->fetchAll();
     }
 
@@ -217,12 +249,8 @@ class Model
      */
     public function delete()
     {
-        if (is_null($this->where)) {
-            //没有执行where就delete,则删除全部表。。。天啊真可怕
-            $this->statement = sprintf("delete from `%s` ", $this->table);
-        } else {
-            $this->statement = sprintf("delete from `%s` ", $this->table).$this->where;
-        }
+        //没有执行where就delete,则删除全部表。。。真可怕
+        $this->statement = sprintf("delete from `%s` ", $this->table).$this->where.$this->Order_by.$this->limit;
         return $this->bind_prpr()->rowCount();
     }
 
@@ -232,11 +260,16 @@ class Model
      */
     private function bind_prpr()
     {
+        echo "$this->statement <br>";
         $sta = $this->db_instance->prepare($this->statement);
         if (count($this->Pdo_bind_data)) {
             foreach ($this->Pdo_bind_data as $key => $value) {
-                //原来bindParam会绑定变量而不是值，害的我差点以为要用到闭包
-                $sta->bindValue($key,$value);
+                if (is_numeric($value)) {
+                    $sta->bindValue($key,$value,\PDO::PARAM_INT);
+                } else {
+                    //原来bindParam会绑定变量而不是值，害的我差点以为要用到闭包
+                    $sta->bindValue($key,$value);
+                }
             }
         }
         $sta->execute();
