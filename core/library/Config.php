@@ -7,9 +7,9 @@ namespace kicoe\Core;
 */
 class Config
 {
-	public static function config_prpr($type)
+    public static function config_prpr($type)
     {
-    	$config = include APP_PATH.'config.php';
-    	return $config[$type];
+        $config = include APP_PATH.'config.php';
+        return $config[$type];
     }
 }

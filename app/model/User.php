@@ -8,9 +8,9 @@ use \kicoe\Core\Model;
 */
 class User extends Model
 {
-	public function __construct()
-	{
-		// 添加表前缀
-		$this->table = "ex_user";
-	}
+    public function __construct()
+    {
+        // 添加表前缀
+        $this->table = "ex_user";
+    }
 }

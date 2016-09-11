@@ -10,12 +10,12 @@ use \kicoe\Core\Db;
  */
 class Model
 {
-	// 类名与表名
-	protected $class;
+    // 类名与表名
+    protected $class;
 
-	protected $table;
+    protected $table;
     // 数据库链接实例
-	protected $db_instance;
+    protected $db_instance;
     // 查询与操作数据
     protected $_data = array();
     // where语句

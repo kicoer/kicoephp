@@ -5,15 +5,15 @@
 */
 class AutoLoad
 {
-	//以下根据官方给出psr-4自动加载实例改
-	protected $prefixes = array();
+    //以下根据官方给出psr-4自动加载实例改
+    protected $prefixes = array();
 
     public function register()
     {
-    	//注册自动加载
+        //注册自动加载
         spl_autoload_register(array($this, 'loadClass'));
-        $this->addNamespace('kicoe\Core', CORE_PATH.'library');		//框架核心库自动加载
-        $this->addNamespace('app\controller', APP_PATH.'controller');	//控制器库自动加载
+        $this->addNamespace('kicoe\Core', CORE_PATH.'library');     //框架核心库自动加载
+        $this->addNamespace('app\controller', APP_PATH.'controller');   //控制器库自动加载
         $this->addNamespace('app\model',APP_PATH.'model');      //模型库自动加载
     }
 

@@ -6,8 +6,8 @@ use \app\model\User;
 
 class Index extends Controller
 {
-	public function index()
-	{
-		$this->show();
-	}
+    public function index()
+    {
+        $this->show();
+    }
 }

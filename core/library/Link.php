@@ -7,10 +7,10 @@ use \kicoe\Core\Exception;
 
 class Link
 {
-	//开始应用
-	public static function start()
+    //开始应用
+    public static function start()
     {
         //注册路由
-		Request::getInstance()->route();
-	}
+        Request::getInstance()->route();
+    }
 } 
