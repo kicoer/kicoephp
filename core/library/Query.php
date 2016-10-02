@@ -163,20 +163,38 @@ class Query
 
     /**
      * 增加数据
-     * @param array $data 要插入的键值对数组
+     * @param array $data 要插入的键值对数组/或者键数组
+     * @param array $v_data 要插入的值数组
      */
-    public function insert($data)
+    public function insert($data, $v_data = NULL)
     {
-        $begin = array();
-        $end = array();
-        foreach ($data as $k => $v) {
-            $begin[] = '`'.$k.'`';
-            $this->Pdo_bind_count++;
-            $end[] = ':in'.$this->Pdo_bind_count;
-            $this->Pdo_bind_data[':in'.$this->Pdo_bind_count] = $v;
+        if (is_null($v_data)) {
+            $begin = array();
+            $end = array();
+            foreach ($data as $k => $v) {
+                $begin[] = '`'.$k.'`';
+                $this->Pdo_bind_count++;
+                $end[] = ':in'.$this->Pdo_bind_count;
+                $this->Pdo_bind_data[':in'.$this->Pdo_bind_count] = $v;
+            }
+            $insert = sprintf("(%s) values (%s)", implode(',', $begin), implode(',', $end));
+            $this->statement = sprintf("insert into %s %s", $this->table, $insert);
+        } else {
+            $begin = $data;
+            $end = array();
+            foreach ($v_data as $value) {
+                $end_l = array();
+                foreach ($value as $v) {
+                    $this->Pdo_bind_count++;
+                    $end_l[] = ':in'.$this->Pdo_bind_count;
+                    $this->Pdo_bind_data[':in'.$this->Pdo_bind_count] = $v;
+                }
+                $end[] = '('.implode(',', $end_l).')';
+
+            }
+            $insert = sprintf("(%s) values %s", implode(',', $begin), implode(',', $end));
+            $this->statement = sprintf("insert into %s %s", $this->table, $insert);
         }
-        $insert = sprintf("(%s) values (%s)", implode(',', $begin), implode(',', $end));
-        $this->statement = sprintf("insert into %s %s", $this->table, $insert);
         return $this->bind_prpr()->rowCount();
     }
 
@@ -259,9 +277,6 @@ class Query
      */
     private function bind_prpr()
     {
-        echo "$this->statement <br>";
-        print_r($this->Pdo_bind_data);
-        echo "<br>";
         $sta = $this->db_instance->prepare($this->statement);
         if (count($this->Pdo_bind_data)) {
             foreach ($this->Pdo_bind_data as $key => $value) {

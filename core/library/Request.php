@@ -124,4 +124,39 @@ class Request
         }
         return $this->post[$index];
     }
+
+    /**
+     * 将上传文件拷贝到。。。
+     * @param string $file_n 上传文件表单名
+     * @param string $file 拷贝文件至服务器public的路径
+     * @param string $arg 文件名或诸多限制 size(KB) type name
+     */
+    public function fileCp($file_n, $path, $arg = array())
+    {
+        $cp_path = PUB_PATH.$path;
+        $file = $_FILES[$file_n];
+        if (!$file) {
+            throw new Exception("文件上传错误", $file_n . " 文件不存在");
+        }
+        $file_name = $file['name'];
+        if (!empty($arg)) {
+            if (isset($arg['size']) && $file['size'] > $arg['size']*1000 ) {
+                throw new Exception("文件上传错误", '上传文件大于 '.$arg['size'].' KB');
+            }
+            if (isset($arg['type'])) {
+                if(!in_array($file['type'], $arg['type'])){
+                    throw new Exception("文件上传错误", '文件类型 '.$file['type'].' 不符合');
+                }
+            }
+            if (is_set($arg['name'])) {
+                $file_name = $arg['name'];
+            }
+        }
+        if (file_exists($cp_path. $file_name)){
+            throw new Exception("文件上传错误", $file_name." already exists. ");
+        } else {
+            move_uploaded_file($file["tmp_name"], $cp_path.$file_name);
+        }
+    }
+
 }

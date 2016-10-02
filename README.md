@@ -69,6 +69,7 @@ class Index extends Controller
     {
         // 这里向user表插入数据
         Query::table('user')->insert(['username'=>'ll','password'=>'***']);
+        Query::table('user')->insert(['username','password'], [ ['11','***'],[12,'..'] ]);
         // 这里是向user表删除数据
         Query::table('user')->where('username','=','kicoe')->delete();
         // 这里查找user表中'username'为kicoe的字段数据中id的值
@@ -120,7 +121,7 @@ class Index extends Controller
         $user->password = sha1('pa');
         $user->insert();
         // 当然insert传入参数后可以构造查询
-        $user->insert(['name','passwd'], ['kicoe',sha1('pa')], ['poi',sha1('pom')]);
+        $user->insert(['name','passwd'], [['kicoe',sha1('pa')], ['poi',sha1('pom')]] );
         // 使用set构造where
         $user->set(['id','<',10], 'or', ['name','kicoe'], ['password',sha1('pa')]);
         // update更新数据
@@ -158,6 +159,9 @@ class Index extends Controller
 {
     public function index()
     {
+        // 为页面赋值
+        $this->assign('a',$a);
+        $this->assign(['a'=>$a, 'b'=>$b]);
         // 默认显示视图app/view/Index/index.php
         $this->show();
         // 当然也可以自定义，位于app/view/a/b.php

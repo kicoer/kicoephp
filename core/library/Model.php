@@ -45,6 +45,13 @@ class Model
     }
 
     /**
+     * 获得上一条执行语句的id
+     */
+    public function lastInsertId(){
+        return $this->db_instance->lastInsertId();
+    }
+
+    /**
      * 获取当前查询结果的实例,一般都只查询一条,且立即执行查询
      * @param array $data 如果为空的话,则不执行，否则查询数据，注意这里使用时务必查询主键且一条数据
      */
@@ -260,7 +267,6 @@ class Model
      */
     private function bind_prpr()
     {
-        echo "$this->statement <br>";
         $sta = $this->db_instance->prepare($this->statement);
         if (count($this->Pdo_bind_data)) {
             foreach ($this->Pdo_bind_data as $key => $value) {

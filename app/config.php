@@ -10,6 +10,6 @@ return [
         // 数据库用户名
         'username'    => 'blog',
         // 数据库密码
-        'password'    => 'onlymybl'
+        'password'    => 'onlymyblog'
     ]
 ];
