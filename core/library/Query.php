@@ -51,6 +51,13 @@ class Query
     }
 
     /**
+     * 获得上一条执行语句的id
+     */
+    public function lastInsertId(){
+        return $this->db_instance->lastInsertId();
+    }
+
+    /**
      * 构造where
      * @param 可惜没有重载，那就自己定义吧
      * @return 返回自身实例
@@ -138,8 +145,11 @@ class Query
      * @param string $data 要查询的条目。不是数组的话查询这一个
      * @return 数组
      */
-    public function select($data = '*')
+    public function select($data = '*', $key = '')
     {
+        if ($key && '*' != $data) {
+                $data = $key . ',' . $data;
+        }
         //构造查询变量
         if (is_array($data)) {
             $select = "select ".implode(',', $data);
@@ -147,7 +157,11 @@ class Query
             $select = "select ".$data;
         }
         $this->statement = sprintf("%s from `%s` ", $select, $this->table).$this->where.$this->Order_by.$this->limit;
-        return $this->bind_prpr()->fetchAll();
+        if ($key) {
+            return $this->bind_prpr()->fetchAll(\PDO::FETCH_UNIQUE | \PDO::FETCH_ASSOC);
+        } else {
+            return $this->bind_prpr()->fetchAll();
+        }
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace kicoe\Core;
 
 use \kicoe\Core\Exception;
+use \kicoe\Core\Config;
 
 /*
  * 请求类，用于保存客户端请求数据
@@ -44,10 +45,19 @@ class Request
         if (!empty($_GET['k'])) {
             $url = trim($_GET['k'],'/');
             $urlArray = explode('/', $url);
-            // 将控制器首字母转换大写
-            $controllerName = ucfirst($urlArray[0]);       
-            // 获取动作名
-            $action = empty($urlArray[1]) ? 'index' : $urlArray[1];       
+            $route_conf = Config::config_prpr('route');
+            $route_action = isset($urlArray[1])?$urlArray[1]:'index';
+            if( !empty($route_conf) && array_key_exists($urlArray[0].'/'.$route_action, $route_conf) ) {
+                // 从匹配的路由表中匹配
+                $sele_conf = explode('/', $route_conf[$urlArray[0].'/'.$route_action]);
+                $controllerName = ucfirst($sele_conf[0]);
+                $action = $sele_conf[1];
+            } else {
+                // 将控制器首字母转换大写
+                $controllerName = ucfirst($urlArray[0]);
+                // 获取动作名
+                $action = empty($urlArray[1]) ? 'index' : $urlArray[1];
+            }
             //获取URL参数
             $queryString = empty($urlArray[2]) ? array() : array_slice($urlArray,2);
         }
@@ -94,7 +104,7 @@ class Request
     {
         if (!isset($this->get[$index])) {
             if (!isset($_GET[$index])) {
-                throw new Exception("GET数据错误",$index . " 参数不存在");
+                return false;
             }
             if (!get_magic_quotes_gpc()) {
                 $this->get[$index] = addslashes($_GET[$index]);
@@ -114,7 +124,7 @@ class Request
     {
         if (!isset($this->post[$index])) {
             if (!isset($_POST[$index])) {
-                throw new Exception("POST数据错误",$index . " 参数不存在");
+                return false;
             }
             if (!get_magic_quotes_gpc()) {
                 $this->post[$index] = addslashes($_POST[$index]);
@@ -149,7 +159,7 @@ class Request
                 }
             }
             if (is_set($arg['name'])) {
-                $file_name = $arg['name'];
+                $file_name = $arg['name'].$file['type'];
             }
         }
         if (file_exists($cp_path. $file_name)){

@@ -51,6 +51,13 @@ return [
         'username'    => '',
         // 数据库密码
         'password'    => ''
+    ],
+    // 路由配置
+    'route' => [
+        // 将article/page操作指向index/index操作
+        'article/page' => 'index/index',
+        // 将link指向index/link
+        'link/index' => 'index/link'
     ]
 ];
 ```
@@ -123,7 +130,7 @@ class Index extends Controller
         // 当然insert传入参数后可以构造查询
         $user->insert(['name','passwd'], [['kicoe',sha1('pa')], ['poi',sha1('pom')]] );
         // 使用set构造where
-        $user->set(['id','<',10], 'or', ['name','kicoe'], ['password',sha1('pa')]);
+        $user->set([['id','<',10], 'or', ['name','kicoe'], ['password',sha1('pa')]]);
         // update更新数据
         $user->update(['name'=>'k']);
         // select查询数据,默认查询所有
@@ -142,6 +149,9 @@ limit($i,$n);
 query('select * from user where id = ?',[$id]);
 // 自定义执行
 execute('select * from user where id = ?',[$id]);
+// 返回上一条执行语句的id
+lastInsertId()
+// select的第二个参数可以返回以该参数为键的关联数组哦
 ```
 #### V  （视图）
 在 `app/view` 中定义 `Controller/action.php`
@@ -185,6 +195,10 @@ class Index extends Controller
         $request = Request::getInstance();
         // 获取用户post提交的name数据
         $name = $request->post('name');
+        // 将用户上传文件复制到某处
+        $request->fileCp('input_name', '/path/img/', [ 'size'=>100, 
+        'name'=>'2016-10-4-2336', 
+        'type'=>['jpg','png'] ]);
         // session操作
         Session::set('name','kicoe');
         if (Session::has('name')) {

@@ -236,10 +236,14 @@ class Model
     /**
      * 从当前条件查询语句
      * @param string $data 要查询的条目。不是数组的话查询这一个
+     * @param string $key 返回关联数组的键
      * @return 数组
      */
-    public function select($data = '*')
+    public function select($data = '*', $key = '')
     {
+        if ($key && '*' != $data) {
+                $data = $key . ',' . $data;
+        }
         //构造查询变量
         if (is_array($data)) {
             $select = "select ".implode(',', $data);
@@ -247,7 +251,11 @@ class Model
             $select = "select ".$data;
         }
         $this->statement = sprintf("%s from `%s` ", $select, $this->table).$this->where.$this->Order_by.$this->limit;
-        return $this->bind_prpr()->fetchAll();
+        if ($key) {
+            return $this->bind_prpr()->fetchAll(\PDO::FETCH_UNIQUE | \PDO::FETCH_ASSOC);
+        } else {
+            return $this->bind_prpr()->fetchAll();
+        }
     }
 
     /**

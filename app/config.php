@@ -10,6 +10,12 @@ return [
         // 数据库用户名
         'username'    => 'blog',
         // 数据库密码
-        'password'    => 'onlymyblog'
+        'password'    => '***'
+    ],
+    // 路由配置
+    'route' => [
+        'article/page' => 'index/index',
+        'article/id' => 'index/article',
+        'link/index' => 'index/link'
     ]
 ];
