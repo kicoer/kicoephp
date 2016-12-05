@@ -136,6 +136,39 @@ class Request
     }
 
     /**
+     * 表单验证函数 只验证post数据
+     * @param string $index _POST数组下标
+     * @param array $vali_arr 要验证的规则
+     * @param NULL / _POST数据
+     */
+    public function validate($index, $vali_arr = NULL)
+    {
+        if (!isset($this->post[$index])) {
+            if (!isset($_POST[$index])) {
+                return false;
+            }
+            if (!get_magic_quotes_gpc()) {
+                $this->post[$index] = addslashes($_POST[$index]);
+            } else {
+                $this->post[$index] = $_POST[$index];
+            }
+        }
+        if ($vali_arr !== NULL) {
+            if (isset($vali_arr['len'])) {
+                if(strlen(strval($this->post[$index])) > $vali_arr['len']){
+                    return false;
+                }
+            }
+            if (isset($vali_arr['reg'])) {
+                if(!preg_match($vali_arr['reg'], $this->post[$index])){
+                    return false;
+                }
+            }
+        }
+        return $this->post[$index];
+    }
+
+    /**
      * 将上传文件拷贝到。。。
      * @param string $file_n 上传文件表单名
      * @param string $file 拷贝文件至服务器public的路径
