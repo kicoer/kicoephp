@@ -6,10 +6,12 @@ use \kicoe\Core\Exception;
 
 class View
 {
+    //视图实例
+    protected static $instance;
 
-    protected static $instance;    //视图实例
-
-    //获取视图实例
+    /**
+     * 获取视图实例
+     */
     public static function getInstance()
     {
         if (is_null(self::$instance)) {
@@ -21,8 +23,9 @@ class View
     /**
      * 展示页面
      * @param string $path 自定义加载路径
+     * @param string $variables 传递的变量
      */
-    public function show($path,$variables)
+    public function show($path, $variables)
     {
         extract($variables);
         if (file_exists(APP_PATH.'view/'.$path.'.php')) {

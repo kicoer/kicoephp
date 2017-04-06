@@ -5,7 +5,7 @@
 
 配置：
 
-* php >= 5.3
+* php >= 5.4
 * PDO
 
 ## 结构
@@ -17,7 +17,6 @@
     -config.php     配置文件
 -core/
     -library/       框架核心库
-    -AutoLoad.php
     -load.php       框架加载文件
 -public/
     -static/
@@ -54,8 +53,8 @@ return [
     ],
     // 路由配置
     'route' => [
-        // 将article/page操作指向index/index操作
-        'article/page' => 'index/index',
+        // 将i/i操作指向index/index操作
+        'i/i' => 'index/index',
         // 将link指向index/link
         'link/index' => 'index/link'
     ]
@@ -75,12 +74,14 @@ class Index extends Controller
     public function index()
     {
         // 这里向user表插入数据
-        Query::table('user')->insert(['username'=>'ll','password'=>'***']);
-        Query::table('user')->insert(['username','password'], [ ['11','***'],[12,'..'] ]);
+        Query::table('user')->insert(['username'=>'ll', 'password'=>'***']);
+        Query::table('user')->insert(['username', 'password'], [ ['11','***'], [12,'..'] ]);
         // 这里是向user表删除数据
-        Query::table('user')->where('username','=','kicoe')->delete();
+        Query::table('user')->where('username', '=', 'kicoe')->delete();
         // 这里查找user表中'username'为kicoe的字段数据中id的值
         Query::table('user')->where('username','kicoe')->select('id');
+        // 这里查找user表中'username'为kicoe 与 admin 的字段数据中所有值，结果为id=>的关联数组
+        Query::table('user')->where('username', 'in', ['kicoe', 'admin'])->select('*', 'id');
         // 这里修改user表中所有id小于10的statu字段为0,orwhere()也可以的哦
         Query::table('user')->where('id','<','10')->update(['statu'=>0]);
     }
@@ -119,8 +120,8 @@ class Index extends Controller
     {
         // 获取ORM对象
         $user = new User;
-        // 获取id为2的数据，注意get需要用来获取主键
-        $user->get(['id'=>2]);
+        // 获取id为2的数据，注意get需要用来获取主键，第二个参数主键默认为'id'
+        $user->get(2, 'id');
         // 可以查询到获取该列的其他数据
         echo $user->name;
         // 也可以直接给对象属性赋值后执行insert()插入数据
@@ -130,7 +131,7 @@ class Index extends Controller
         // 当然insert传入参数后可以构造查询
         $user->insert(['name','passwd'], [['kicoe',sha1('pa')], ['poi',sha1('pom')]] );
         // 使用set构造where
-        $user->set([['id','<',10], 'or', ['name','kicoe'], ['password',sha1('pa')]]);
+        $user->set([['id', 'not between', [1, 5]], 'or', ['name','kicoe'], ['password',sha1('pa')]]);
         // update更新数据
         $user->update(['name'=>'k']);
         // select查询数据,默认查询所有
@@ -195,10 +196,6 @@ class Index extends Controller
         $request = Request::getInstance();
         // 获取用户post提交的name数据
         $name = $request->post('name');
-        // 将用户上传文件复制到某处
-        $request->fileCp('input_name', '/path/img/', [ 'size'=>100, 
-        'name'=>'2016-10-4-2336', 
-        'type'=>['jpg','png'] ]);
         // session操作
         Session::set('name','kicoe');
         if (Session::has('name')) {

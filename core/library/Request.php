@@ -4,6 +4,7 @@ namespace kicoe\Core;
 
 use \kicoe\Core\Exception;
 use \kicoe\Core\Config;
+use \ReflectionClass;
 
 /*
  * 请求类，用于保存客户端请求数据
@@ -63,20 +64,14 @@ class Request
         }
         $queryString = empty($queryString) ? array() : $queryString;
         $controller = 'app\controller\\'.$controllerName;
-        if(class_exists($controller)){
-            $this->_controller = $controllerName;
-            // 实例化控制器,传入控制器和操作
-            $controllerPoi = new $controller();
-        } else {
-            throw new Exception("路由错误",$controllerName . " 控制器不存在");
-        }
-        // 如果控制器和动作存在，这调用并传入URL参数
-        if ((int)method_exists($controllerPoi, $action)) {
+        $this->_controller = $controllerName;
+        // 获取控制器类的反射实例
+        $controllerReflec = new ReflectionClass($controller);
+        if ($controllerReflec->isSubclassOf('kicoe\Core\Controller')) {
             $this->_action = $action;
-            //主要函数
-            call_user_func_array(array($controllerPoi,$action),$queryString);
-        } else {
-            throw new Exception("路由错误",$action . " 操作不存在");
+            $actionReflec = $controllerReflec->getMethod($action);
+            // 利用反射执行
+            $actionReflec->invokeArgs($controllerReflec->newInstance(), $queryString);           
         }
     }
 
@@ -140,6 +135,7 @@ class Request
      * @param string $index _POST数组下标
      * @param array $vali_arr 要验证的规则
      * @param NULL / _POST数据
+     * @return 成功验证的数据 / false
      */
     public function validate($index, $vali_arr = NULL)
     {
@@ -166,40 +162,6 @@ class Request
             }
         }
         return $this->post[$index];
-    }
-
-    /**
-     * 将上传文件拷贝到。。。
-     * @param string $file_n 上传文件表单名
-     * @param string $file 拷贝文件至服务器public的路径
-     * @param string $arg 文件名或诸多限制 size(KB) type name
-     */
-    public function fileCp($file_n, $path, $arg = array())
-    {
-        $cp_path = PUB_PATH.$path;
-        $file = $_FILES[$file_n];
-        if (!$file) {
-            throw new Exception("文件上传错误", $file_n . " 文件不存在");
-        }
-        $file_name = $file['name'];
-        if (!empty($arg)) {
-            if (isset($arg['size']) && $file['size'] > $arg['size']*1000 ) {
-                throw new Exception("文件上传错误", '上传文件大于 '.$arg['size'].' KB');
-            }
-            if (isset($arg['type'])) {
-                if(!in_array($file['type'], $arg['type'])){
-                    throw new Exception("文件上传错误", '文件类型 '.$file['type'].' 不符合');
-                }
-            }
-            if (is_set($arg['name'])) {
-                $file_name = $arg['name'].$file['type'];
-            }
-        }
-        if (file_exists($cp_path. $file_name)){
-            throw new Exception("文件上传错误", $file_name." already exists. ");
-        } else {
-            move_uploaded_file($file["tmp_name"], $cp_path.$file_name);
-        }
     }
 
 }

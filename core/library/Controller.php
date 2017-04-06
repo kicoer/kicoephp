@@ -7,7 +7,8 @@ use \kicoe\Core\Request;
 
 class Controller
 {
-    protected $view;    //视图类
+    //视图类
+    protected $view;
 
     //需要传递给视图的值
     protected $variables = array();
@@ -24,19 +25,28 @@ class Controller
      */
     public function assign($name='', $value='')
     {
-        if($value == '' && is_array($name)){
+        if($value == ''){
             $this->variables = array_merge($this->variables,$name);
         } else {
             $this->variables[$name] = $value;
         }
     }
 
+    /**
+     * 加载页面
+     * @param string|'' $path  自定义路径或空
+     */
     public function show($path = '')
     {
-        // 获取控制器和操作名
-        $controller = Request::getInstance()->getController();
-        $action = Request::getInstance()->getAction();
-        $this->view->show($path===''?$controller.'/'.$action:$path,$this->variables);
+        if ($path === '') {
+            // 获取控制器和操作名
+            $controller = Request::getInstance()->getController();
+            $action = Request::getInstance()->getAction();
+            $this->view->show($controller.'/'.$action,$this->variables);
+        } else {
+            // 加载自定义页面
+            $this->view->show($path,$this->variables);
+        }
     }
 
 }

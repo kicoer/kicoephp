@@ -42,7 +42,7 @@ class Error
     public static function onlymy_shutdown_handler()
     {
         if (!is_null($error = error_get_last()) && in_array($error['type'], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE])) {
-            $Exc_instance = new Exception('致命错误 t:'.$error['type'],$error['message'],$error['file'],$error['line']);
+            $Exc_instance = new Exception('致命错误 t:'.$error['type'], $error['message'], $error['file'],$error['line']);
             //翻了下tp源码，总算知道原来这里的异常得交给别的函数抛出啊
             self::onlymy_exception_handler($Exc_instance);
         }

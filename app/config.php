@@ -8,14 +8,13 @@ return [
         // 数据库名
         'database'    => 'blog',
         // 数据库用户名
-        'username'    => 'blog',
+        'username'    => 'kicoe',
         // 数据库密码
-        'password'    => '***'
+        'password'    => 'kicoephp'
     ],
     // 路由配置
     'route' => [
-        'article/page' => 'index/index',
+        'i/i' => 'index/index',
         'article/id' => 'index/article',
-        'link/index' => 'index/link'
     ]
 ];

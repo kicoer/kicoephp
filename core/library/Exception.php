@@ -10,12 +10,12 @@ class Exception extends \Exception
         <html>
         <head>
         <meta charset="UTF-8">
-        <title>_(:з」∠)_</title>
+        <title> _(:з」∠)_</title>
         <meta name="robots" content="noindex,nofollow" />
         <style>
             *{ font-family: "Microsoft Yahei"; }
             .er { width:400px;margin:40px auto; }
-            .er div span{ display:block; padding:2px 10px; font-size:13px; color:#FF4040; background-color:#CCCCCC; box-shadow: 1px 1px 1px #CCCCCC; }
+            .er div span{ display:block; padding:3px 10px; font-size:13px; color:#FF4040; box-shadow: 0px 1px 0px #ddd;letter-spacing: 1px; }
             .er div p{ padding:5px 10px; }
         </style>
         </head>
