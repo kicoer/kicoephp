@@ -4,6 +4,7 @@ namespace kicoe\Core;
 
 use \kicoe\Core\Exception;
 use \kicoe\Core\Config;
+use \kicoe\Core\File;
 use \ReflectionClass;
 
 /*
@@ -60,9 +61,9 @@ class Request
                 $action = empty($urlArray[1]) ? 'index' : $urlArray[1];
             }
             //获取URL参数
-            $queryString = empty($urlArray[2]) ? array() : array_slice($urlArray,2);
+            $queryString = empty($urlArray[2]) ? [] : array_slice($urlArray,2);
         }
-        $queryString = empty($queryString) ? array() : $queryString;
+        $queryString = empty($queryString) ? [] : $queryString;
         $controller = 'app\controller\\'.$controllerName;
         $this->_controller = $controllerName;
         // 获取控制器类的反射实例
@@ -70,8 +71,20 @@ class Request
         if ($controllerReflec->isSubclassOf('kicoe\Core\Controller')) {
             $this->_action = $action;
             $actionReflec = $controllerReflec->getMethod($action);
-            // 利用反射执行
-            $actionReflec->invokeArgs($controllerReflec->newInstance(), $queryString);           
+            $params = $actionReflec->getParameters();
+            $i = 0;
+            $pas = [];
+            // 注入依赖
+            foreach ($params as $pa) {
+                if ($class = $pa->getClass()) {
+                    if('kicoe\Core\Request' === $class->getName())
+                        $pas[] = \kicoe\Core\Request::getInstance();
+                } else {
+                    $pas[] = $queryString[$i];
+                    $i++;
+                }
+            }
+            $actionReflec->invokeArgs($controllerReflec->newInstance(), $pas);           
         }
     }
 
@@ -162,6 +175,16 @@ class Request
             }
         }
         return $this->post[$index];
+    }
+
+    /**
+     * 获取用户上传文件
+     * @param string $name 文件name
+     * @return File 继承自splFileInfo的文件处理类
+     */
+    public function file($name)
+    {
+        return (new File($_FILES[$name]["tmp_name"], $_FILES[$name]));
     }
 
 }

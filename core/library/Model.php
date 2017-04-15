@@ -63,25 +63,27 @@ class Model extends Moo
      * @param array $data where中的键值对数组
      * @return 当前对象
      */
-    public function set($data)
+    public function set($data = NULL)
     {
         $this->resetV();
-        // and | or
-        $con_token = '';
-        foreach ($data as $value) {
-            switch (count($value)) {
-                case 1:
-                    # 为1时，为and 或 or
-                    $con_token = $value;
-                    break;
-                case 2:
-                    # 为2是，还是默认=的数组
-                    $this->wh($value[0], $value[1], False, $con_token);
-                    break;
-                case 3:
-                    # 为3时，数组第二个元素为判断符
-                    $this->wh($value[0], $value[1], $value[2], $con_token);
-                    break;
+        if ($data !== NULL) {
+            // and | or
+            $con_token = '';
+            foreach ($data as $value) {
+                switch (count($value)) {
+                    case 1:
+                        # 为1时，为and 或 or
+                        $con_token = $value;
+                        break;
+                    case 2:
+                        # 为2是，还是默认=的数组
+                        $this->wh($value[0], $value[1], False, $con_token);
+                        break;
+                    case 3:
+                        # 为3时，数组第二个元素为判断符
+                        $this->wh($value[0], $value[1], $value[2], $con_token);
+                        break;
+                }
             }
         }
         return $this;
