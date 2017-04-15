@@ -132,6 +132,8 @@ class Index extends Controller
         $user->insert(['name','passwd'], [['kicoe',sha1('pa')], ['poi',sha1('pom')]] );
         // 使用set构造where
         $user->set([['id', 'not between', [1, 5]], 'or', ['name','kicoe'], ['password',sha1('pa')]]);
+        // set清空
+        $user->set()->get(2);
         // update更新数据
         $user->update(['name'=>'k']);
         // select查询数据,默认查询所有
@@ -188,19 +190,28 @@ namespace app\controller;
 use \kicoe\Core\Controller;
 use \kicoe\Core\Request;
 use \kicoe\Core\Session;
+use \kicoe\Core\File;
 
 class Index extends Controller
 {
-    public function index()
-    {
-        $request = Request::getInstance();
+    // 依赖注入 Request | $request = Request::getInstance();
+    public function index(Request $request)
+    {        
         // 获取用户post提交的name数据
         $name = $request->post('name');
+        // 验证获取(post)
+        $email = $request->validate('email', ['reg'=>'/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/']);
+        $text = $request->validate('comment', ['len'=>444]);
         // session操作
         Session::set('name','kicoe');
         if (Session::has('name')) {
             echo Session::get('name');
         }
+        // 返回文件操作类 (继承自SplFileInfo)
+        $file = $request->file('file');
+        // 验证
+        $file->veri(['size'=>500, 'type'=>'text/css', 'ext'=>['css', 'txt']]);
+        $file = $file->CP(PUB_PATH. 'static/img/i.jpg');
     }
 }
 ```
