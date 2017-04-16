@@ -2,6 +2,7 @@
 
 namespace kicoe\Core;
 
+use \kicoe\Core\Route;
 use \kicoe\Core\Exception;
 use \kicoe\Core\Config;
 use \kicoe\Core\File;
@@ -42,50 +43,12 @@ class Request
      */
     public function route()
     {
-        $controllerName = 'Index';
-        $action = 'index';
-        if (!empty($_GET['k'])) {
-            $url = trim($_GET['k'],'/');
-            $urlArray = explode('/', $url);
-            $route_conf = Config::config_prpr('route');
-            $route_action = isset($urlArray[1])?$urlArray[1]:'index';
-            if( !empty($route_conf) && array_key_exists($urlArray[0].'/'.$route_action, $route_conf) ) {
-                // 从匹配的路由表中匹配
-                $sele_conf = explode('/', $route_conf[$urlArray[0].'/'.$route_action]);
-                $controllerName = ucfirst($sele_conf[0]);
-                $action = $sele_conf[1];
-            } else {
-                // 将控制器首字母转换大写
-                $controllerName = ucfirst($urlArray[0]);
-                // 获取动作名
-                $action = empty($urlArray[1]) ? 'index' : $urlArray[1];
-            }
-            //获取URL参数
-            $queryString = empty($urlArray[2]) ? [] : array_slice($urlArray,2);
+        if ($k = $this->get('k')) {
+            Route::init($k);
         }
-        $queryString = empty($queryString) ? [] : $queryString;
-        $controller = 'app\controller\\'.$controllerName;
-        $this->_controller = $controllerName;
-        // 获取控制器类的反射实例
-        $controllerReflec = new ReflectionClass($controller);
-        if ($controllerReflec->isSubclassOf('kicoe\Core\Controller')) {
-            $this->_action = $action;
-            $actionReflec = $controllerReflec->getMethod($action);
-            $params = $actionReflec->getParameters();
-            $i = 0;
-            $pas = [];
-            // 注入依赖
-            foreach ($params as $pa) {
-                if ($class = $pa->getClass()) {
-                    if('kicoe\Core\Request' === $class->getName())
-                        $pas[] = \kicoe\Core\Request::getInstance();
-                } else {
-                    $pas[] = $queryString[$i];
-                    $i++;
-                }
-            }
-            $actionReflec->invokeArgs($controllerReflec->newInstance(), $pas);           
-        }
+        $this->_controller = Route::getController();
+        $this->_action = Route::getAction();
+        Route::reflec();
     }
 
     /** 

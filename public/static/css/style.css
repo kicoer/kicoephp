@@ -1,7 +1,2 @@
-body{
-    background-color: #feeeed;
-}
-h2{
-    text-align: center;
-    color: #666;
-}
+body{background-color: #feeeed;}
+h2{text-align: center;color: #233;text-shadow:#ddd 0 1px 0;font-weight: normal;}
