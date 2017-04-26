@@ -31,13 +31,6 @@ class Query extends Moo
     }
 
     /**
-     * 获得上一条执行语句的id
-     */
-    public function lastInsertId(){
-        return $this->db_instance->lastInsertId();
-    }
-
-    /**
      * 构造where
      * @param 
      * @return obj 自身实例

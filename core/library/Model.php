@@ -35,13 +35,6 @@ class Model extends Moo
     }
 
     /**
-     * 获得上一条执行语句的id
-     */
-    public function lastInsertId(){
-        return $this->db_instance->lastInsertId();
-    }
-
-    /**
      * 获取当前查询结果的实例,一般都只查询一条,且立即执行查询
      * @param mixed $val 主键的值
      * @param string $pk 主键名

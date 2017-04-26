@@ -1,15 +1,21 @@
 # kicoephp
 
+
+
 ## 关于
+
 超级小巧简单的phpMVC框架，用来搭博客的
 
-配置：
+依赖：
 
 * php >= 5.4
 * PDO
 
+
+
 ## 结构
-```
+
+```json
 -app/
     -controller/    控制器
     -model/         模型
@@ -23,21 +29,21 @@
     -index.php      入口文件
 ```
 和普通MVC没什么太大区别
+
+
+
 ## 使用
+
 #### nginx
-把页面链接指向`index.php?k=`，nginx配置如下：
-```
+页面链接重定向`index.php?k=`，nginx配置如下：
+```json
 location / {
-    ...//原来的代码
-    if (!-e $request_filename) {
-        rewrite ^(.*)$ /index.php?k=$1 last;
-        break;
-    }
+    try_files $uri $uri/ /index.php?k=$uri;
 }
 ```
 再将网站的根目录设置为public文件夹路径
 #### 配置文件
-位于app目录下的 `config.php` 填上自己的数据库配置吧
+位于app目录下的 `config.php` 填上自己的数据库与路由配置吧
 ```php
 return [
     //数据库配置
@@ -67,28 +73,30 @@ return [
 namespace app\controller;
 
 use \kicoe\Core\Controller;
-use \kicoe\Core\Query;  //引入数据库操作类
+use \kicoe\Core\Query;  //引入数据库查询类
 
 class Index extends Controller
 {
     public function index()
     {
-        // 这里向user表插入数据
+        // 向user表插入数据
         Query::table('user')->insert(['username'=>'ll', 'password'=>'***']);
         Query::table('user')->insert(['username', 'password'], [ ['11','***'], [12,'..'] ]);
-        // 这里是向user表删除数据
+        // 向user表删除数据
         Query::table('user')->where('username', '=', 'kicoe')->delete();
-        // 这里查找user表中'username'为kicoe的字段数据中id的值
+        // 查找user表中`username`='kicoe'的字段数据中id的值
         Query::table('user')->where('username','kicoe')->select('id');
-        // 这里查找user表中'username'为kicoe 与 admin 的字段数据中所有值，结果为id=>的关联数组
+        // 查找user表中`username`为'kicoe'或'admin'的字段数据中所有值，结果为id=>*的关联数组
         Query::table('user')->where('username', 'in', ['kicoe', 'admin'])->select('*', 'id');
-        // 这里修改user表中所有id小于10的statu字段为0,orwhere()也可以的哦
-        Query::table('user')->where('id','<','10')->update(['statu'=>0]);
+        // 修改user表中所有`id`小于10的statu字段为0
+        Query::table('user')->where('id','<',10)->update(['statu'=>0]);
+      	// 关于orwhere的正确用法 `username`='admin' or `username`='kicoe'
+        Query::table('user')->where('username','admin')->orwhere('username','kicoe')->select('*');
     }
 }
 ```
 和优雅的laravel好像。。。
-首先定义模型于 `app/model/User.php`
+定义模型于 `app/model/User.php`
 ```php
 <?php
 namespace app\model;
@@ -128,9 +136,9 @@ class Index extends Controller
         $user->name = 'kicoe';
         $user->password = sha1('pa');
         $user->insert();
-        // 当然insert传入参数后可以构造查询
+        // 当然insert可以像查询构造器那样传入参数
         $user->insert(['name','passwd'], [['kicoe',sha1('pa')], ['poi',sha1('pom')]] );
-        // 使用set构造where
+        // 使用set构造where, 要优雅？
         $user->set([['id', 'not between', [1, 5]], 'or', ['name','kicoe'], ['password',sha1('pa')]]);
         // set清空
         $user->set()->get(2);
@@ -138,7 +146,7 @@ class Index extends Controller
         $user->update(['name'=>'k']);
         // select查询数据,默认查询所有
         $user->select('name');
-        // delete删除数据，未使用set / get构造查询条件则会删除所有
+        // delete删除数据，未使用get / set构造查询条件则会删除所有
         $user->delete();
     }
 }
@@ -170,19 +178,19 @@ use \kicoe\Core\Controller;
 
 class Index extends Controller
 {
-    public function index()
+    public function index($a = 'a', $b = 'b')
     {
-        // 为页面赋值
-        $this->assign('a',$a);
+        // 为页面赋值的两种方式
+        $this->assign('a', $a);
         $this->assign(['a'=>$a, 'b'=>$b]);
-        // 默认显示视图app/view/Index/index.php
+        // 默认显示视图app/view/Index(控制器名)/index(操作名).php
         $this->show();
         // 当然也可以自定义，位于app/view/a/b.php
         $this->show('a/b');
     }
 }
 ```
-#### 关于Session和提交数据post get的操作
+#### 关于Session和Request的操作
 ```php
 <?php
 namespace app\controller;
@@ -211,11 +219,15 @@ class Index extends Controller
         $file = $request->file('file');
         // 验证
         $file->veri(['size'=>500, 'type'=>'text/css', 'ext'=>['css', 'txt']]);
+        // 上传 @return SplFileInfo
         $file = $file->CP(PUB_PATH. 'static/img/i.jpg');
     }
 }
 ```
+
+
 ## 完结撒花
+
 花了一些时间，终于把这个小小的框架写好了，自己用用就好
 
 嗯，就是这样
