@@ -222,4 +222,4 @@ class Index extends Controller
 
 花了一些时间，终于把这个小小的框架写好了
 
-[blog](kicoe.com)
+[blog](http://kicoe.com)
