@@ -1,7 +1,5 @@
 # kicoephp
 
-
-
 ## 关于
 
 超级小巧简单的phpMVC框架，用来搭博客的
@@ -11,11 +9,9 @@
 * php >= 5.4
 * PDO
 
-
-
 ## 结构
 
-```json
+```
 -app/
     -controller/    控制器
     -model/         模型
@@ -30,13 +26,11 @@
 ```
 和普通MVC没什么太大区别
 
-
-
 ## 使用
 
 #### nginx
 页面链接重定向`index.php?k=`，nginx配置如下：
-```json
+```
 location / {
     try_files $uri $uri/ /index.php?k=$uri;
 }
@@ -95,7 +89,6 @@ class Index extends Controller
     }
 }
 ```
-和优雅的laravel好像。。。
 定义模型于 `app/model/User.php`
 ```php
 <?php
@@ -225,12 +218,8 @@ class Index extends Controller
 }
 ```
 
-
 ## 完结撒花
 
-花了一些时间，终于把这个小小的框架写好了，自己用用就好
+花了一些时间，终于把这个小小的框架写好了
 
-嗯，就是这样
-
-
-
+[blog](kicoe.com)
