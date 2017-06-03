@@ -46,6 +46,20 @@ class Moo
     }
 
     /**
+     * pdo绑定数据
+     * @param string $pre 绑定命名前缀
+     * @param  mixed $data 绑定数据
+     * @return string 当前绑定名
+     */
+    protected function pdoBind($pre, $data)
+    {
+        $pre_name = ':'. $pre;
+        $this->Pdo_bind_count++;
+        $this->Pdo_bind_data[ $pre_name. $this->Pdo_bind_count] = $data;
+        return $pre_name. $this->Pdo_bind_count;
+    }
+
+    /**
      * 构造where
      * @param string $in 'or' | 'and'
      */
@@ -56,34 +70,25 @@ class Moo
         } else {
             $start_where = ' '.$in.' ';
         }
-        
-        if ($arg3 == False && !in_array($arg2, array('=','!=','<>','<','>','<=','>=','BETWEEN','LIKE','IN','NOT IN','NOT LINK','NOT BETWEEN'))) {
-            $this->Pdo_bind_count++;          
-            $creat_where = '`'.$arg1.'` = :wh'.$this->Pdo_bind_count;
-            $this->Pdo_bind_data[':wh'.$this->Pdo_bind_count] = $arg2;
+        if ($arg3 == False) {
+            $creat_where = '`'.$arg1.'` = '. $this->pdoBind('wh', $arg2);
         } else {
-            $sign = strtolower($arg2);            
-            if ($sign == 'in' || $sign =='not in' ) {
+            $sign = strtolower($arg2);
+            if (in_array($sign, ['=','!=','<>','<','>','<=','>=','like','not like'])) {
+                $creat_where = '`'.$arg1.'` '.$arg2.' '. $this->pdoBind('wh', $arg3);
+            } elseif ($sign == 'in' || $sign =='not in' ) {
                 // IN 与 NOT IN 处理
                 $in_arr = [];
                 foreach ($arg3 as $in_key => $in_val) {
-                    $this->Pdo_bind_count++;
-                    $this->Pdo_bind_data[':wh'.$this->Pdo_bind_count] = $in_val;
-                    $in_arr[] = ' :wh'. $this->Pdo_bind_count;
+                    $in_arr[] = ' '. $this->pdoBind('wh', $in_val);
                 }
                 $creat_where = '`'.$arg1.'` '.$arg2. ' ('. implode(',', $in_arr). ')';
             } elseif ($sign == 'between' || $sign=='not between' ) {
                 // BETWEEN 处理
-                $this->Pdo_bind_count++;
-                $this->Pdo_bind_data[':wh'.$this->Pdo_bind_count] = $arg3[0];
-                $creat_where = '`'.$arg1.'` '.$arg2.' :wh'. $this->Pdo_bind_count. ' and :wh';
-                $this->Pdo_bind_count++;
-                $this->Pdo_bind_data[':wh'.$this->Pdo_bind_count] = $arg3[1];
-                $creat_where .= $this->Pdo_bind_count;             
+                $creat_where = '`'.$arg1.'` '.$arg2.' '.$this->pdoBind('wh', $arg3[0]);    //. $this->Pdo_bind_count. ' and :wh';
+                $creat_where .= ' and '. $this->pdoBind('wh', $arg3[1]);
             } else {
-                $this->Pdo_bind_count++;            
-                $creat_where = '`'.$arg1.'` '.$arg2.' :wh'.$this->Pdo_bind_count;
-                $this->Pdo_bind_data[':wh'.$this->Pdo_bind_count] = $arg3;
+                throw new Exception("不允许的sql符号", "<b>$arg2</b>");
             }
         }
         $this->where .= ($start_where.$creat_where);
@@ -112,16 +117,12 @@ class Moo
      * 构造limit语句
      * @param string $index 要开始的位置
      * @param string $number 要获取的数量
-     * @param obj 自身实例
+     * @return obj 自身实例
      */
     public function limit($index, $number)
     {
-        $this->Pdo_bind_count++;
-        $this->limit = ' limit :li'.$this->Pdo_bind_count;
-        $this->Pdo_bind_data[':li'.$this->Pdo_bind_count] = $index;
-        $this->Pdo_bind_count++;
-        $this->limit .= (',:li'.$this->Pdo_bind_count);
-        $this->Pdo_bind_data[':li'.$this->Pdo_bind_count] = $number;
+        $this->limit = ' limit '. $this->pdoBind('li', $index);
+        $this->limit .= (','. $this->pdoBind('li', $number));
         return $this;
     }
 
@@ -141,7 +142,7 @@ class Moo
         } else {
             $select = "select ".$data;
         }
-        $this->statement = sprintf("%s from `%s` ", $select, $this->table).$this->where.$this->Order_by.$this->limit;
+        $this->statement = "$select from $this->table ". $this->where. $this->Order_by. $this->limit;
         if ($key) {
             return $this->bind_prpr()->fetchAll(\PDO::FETCH_UNIQUE | \PDO::FETCH_ASSOC);
         } else {
@@ -151,12 +152,12 @@ class Moo
 
     /**
      * 从当前条件删除语句
-     * @return 删除行数
+     * @return int 删除行数
      */
     public function delete()
     {
         //没有执行where就delete,则删除全部表
-        $this->statement = sprintf("delete from `%s` ", $this->table).$this->where.$this->Order_by.$this->limit;
+        $this->statement = "delete from `$this->table` ". $this->where. $this->Order_by. $this->limit;
         return $this->bind_prpr()->rowCount();
     }
 
@@ -173,47 +174,40 @@ class Moo
             $end = array();
             foreach ($data as $k => $v) {
                 $begin[] = '`'.$k.'`';
-                $this->Pdo_bind_count++;
-                $end[] = ':in'.$this->Pdo_bind_count;
-                $this->Pdo_bind_data[':in'.$this->Pdo_bind_count] = $v;
+                $end[] .= $this->pdoBind('in', $v);
             }
-            $insert = sprintf("(%s) values (%s)", implode(',', $begin), implode(',', $end));
-            $this->statement = sprintf("insert into %s %s", $this->table, $insert);
+            $insert = "(". implode(',', $begin).") values (". implode(',', $end).")";
         } else {
             $begin = $data;
             $end = array();
             foreach ($v_data as $value) {
                 $end_l = array();
                 foreach ($value as $v) {
-                    $this->Pdo_bind_count++;
-                    $end_l[] = ':in'.$this->Pdo_bind_count;
-                    $this->Pdo_bind_data[':in'.$this->Pdo_bind_count] = $v;
+                    $end_l[] .=  $this->pdoBind('in', $v);
                 }
                 $end[] = '('.implode(',', $end_l).')';
 
             }
-            $insert = sprintf("(%s) values %s", implode(',', $begin), implode(',', $end));
-            $this->statement = sprintf("insert into %s %s", $this->table, $insert);
+            $insert = "(". implode(',', $begin).") values ". implode(',', $end);
         }
+        $this->statement = "insert into $this->table $insert";
         return $this->bind_prpr()->rowCount();
     }
 
     /**
      * 更新数据
      * @param array $data 要修改的键值对数组
-     * @return 影响行数
+     * @return int 影响行数
      */
     public function update($data)
     {
         $fields = array();
         foreach ($data as $key => $value) {
-            $this->Pdo_bind_count++;
-            $fields[] = sprintf("`%s` = :up%s", $key, $this->Pdo_bind_count);
-            $this->Pdo_bind_data[':up'.$this->Pdo_bind_count] = $value;
+            $fields[] = "`$key` = ". $this->pdoBind('up', $value);
         }
         $update = implode(',', $fields);
         # 没有where的话,修改所有数据
-        $this->statement = sprintf("update `%s` set %s ",$this->table,$update).$this->where.$this->Order_by.$this->limit;
+        $this->statement = "update `$this->table` set $update ". $this->where. $this->Order_by. $this->limit;
         return $this->bind_prpr()->rowCount();
     }
 
@@ -223,6 +217,9 @@ class Moo
      */
     protected function bind_prpr()
     {
+        echo "$this->statement <br>";
+        print_r($this->Pdo_bind_data);
+        echo "<br><br>";
         $sta = $this->db_instance->prepare($this->statement);
 
         if (count($this->Pdo_bind_data)) {
@@ -271,7 +268,7 @@ class Moo
      * 自定义查询，支持参数绑定
      * @param string $my_statement 自定义查询语句
      * @param array $bind_arg 参数绑定数组
-     * @return 返回查询结果数组
+     * @return array 返回查询结果数组
      */
     public static function query($my_statement,$bind_arg = NULL)
     {
@@ -282,7 +279,7 @@ class Moo
      * 自定义查询，支持参数绑定
      * @param string $my_statement 自定义查询语句
      * @param array $bind_arg 参数绑定数组
-     * @return 返回影响行数
+     * @return int 返回影响行数
      */
     public static function execute($my_statement,$bind_arg = NULL)
     {

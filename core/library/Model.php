@@ -43,9 +43,7 @@ class Model extends Moo
     public function get($val, $pk = 'id')
     {
         $this->resetV();
-        $this->Pdo_bind_count++;
-        $this->Pdo_bind_data[':wh'.$this->Pdo_bind_count] = $val;
-        $this->where = ' where '. $pk. ' = :wh'. $this->Pdo_bind_count;
+        $this->where = ' where '. $pk. ' = '. $this->pdoBind('wh', $val);
         $this->statement = 'select * from '. $this->table. $this->where;
         $this->_data = $this->bind_prpr()->fetch();
         return $this;

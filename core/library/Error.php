@@ -32,7 +32,7 @@ class Error
      */
     public static function onlymy_error_handler($error_level, $error_message, $error_file, $error_line, $error_context)
     {
-        throw new Exception('系统错误 ',$error_message,$error_file,$error_line);
+        throw new Exception('系统错误 s:',$error_message,$error_file,$error_line);
     }
 
     /**

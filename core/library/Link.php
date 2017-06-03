@@ -3,7 +3,6 @@
 namespace kicoe\Core;
 
 use \kicoe\Core\Request;
-use \kicoe\Core\Exception;
 
 class Link
 {

@@ -57,6 +57,7 @@ class Exception extends \Exception
     //用于显示错误的页面信息
     public function show()
     {
+        header("HTTP/1.1 500 $this->message");
         echo $this->Exception_tpl_start.sprintf($this->Exception_tpl, $this->Exc_type, $this->message, $this->file, $this->line);
     }
 
