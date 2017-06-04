@@ -20,7 +20,7 @@ class Db
         if(is_null(self::$instance)){ 
             $db_config = Config::config_prpr('db');
             try {
-                $dsn = sprintf("mysql:host=%s;dbname=%s;charset=utf8", $db_config['hostname'], $db_config['database']);
+                $dsn = "mysql:host=". $db_config['hostname']. ";dbname=". $db_config['database']. ";charset=utf8";
                 self::$instance = new PDO($dsn, $db_config['username'], $db_config['password'], array(PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));
             } catch (PDOException $e) {
                 

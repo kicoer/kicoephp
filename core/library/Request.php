@@ -4,7 +4,6 @@ namespace kicoe\Core;
 
 use \kicoe\Core\Route;
 use \kicoe\Core\Exception;
-use \kicoe\Core\Config;
 use \kicoe\Core\File;
 use \ReflectionClass;
 
@@ -15,10 +14,6 @@ use \ReflectionClass;
 class Request
 {
     protected static $_instance;
-
-    private $_controller;
-
-    private $_action;
 
     private $get;
 
@@ -46,8 +41,6 @@ class Request
         if ($k = $this->get('k')) {
             Route::init($k);
         }
-        $this->_controller = Route::getController();
-        $this->_action = Route::getAction();
         Route::reflec();
     }
 
@@ -56,14 +49,14 @@ class Request
      */
     public function getController()
     {
-        return $this->_controller;
+        return Route::getController();
     }
     /**
      * 获取动作名
      */
     public function getAction()
     {
-        return $this->_action;
+        return Route::getAction();
     }
 
     /**
@@ -115,29 +108,16 @@ class Request
      */
     public function validate($index, $vali_arr = NULL)
     {
-        if (!isset($this->post[$index])) {
-            if (!isset($_POST[$index])) {
-                return false;
+        $post_val = $this->post($index);
+        if ($post_val !== false && $vali_arr !== NULL) {
+            if(isset($vali_arr['len']) && strlen(strval($post_val)) > $vali_arr['len']){
+                throw new Exception("字符长度超出 ", 'str overflow : '.$vali_arr['len']);
             }
-            if (!get_magic_quotes_gpc()) {
-                $this->post[$index] = addslashes($_POST[$index]);
-            } else {
-                $this->post[$index] = $_POST[$index];
-            }
-        }
-        if ($vali_arr !== NULL) {
-            if (isset($vali_arr['len'])) {
-                if(strlen(strval($this->post[$index])) > $vali_arr['len']){
-                    return false;
-                }
-            }
-            if (isset($vali_arr['reg'])) {
-                if(!preg_match($vali_arr['reg'], $this->post[$index])){
-                    return false;
-                }
+            if(isset($vali_arr['reg']) && !preg_match($vali_arr['reg'], $post_val)){
+                throw new Exception("正则匹配失败 ", $vali_arr['reg']);
             }
         }
-        return $this->post[$index];
+        return $post_val;
     }
 
     /**

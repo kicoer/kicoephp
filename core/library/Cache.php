@@ -4,6 +4,7 @@ namespace kicoe\Core;
 
 /**
  * 缓存类，序列化
+ * 测试扩展类
  */
 class Cache
 {

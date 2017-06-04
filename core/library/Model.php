@@ -25,7 +25,7 @@ class Model extends Moo
     public function __construct()
     {
         $this->db_instance = Db::connect();
-        if (is_null($this->table)) {
+        if ( $this->table === '' ) {
             // 获取模型名称
             $this->class = explode('\\',get_class($this));
             $this->class = end($this->class);

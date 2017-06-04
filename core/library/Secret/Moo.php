@@ -9,11 +9,11 @@ use \kicoe\Core\Db;
 */
 class Moo
 {
-    protected $table;
+    protected $table = '';
     // 数据库链接实例
-    protected $db_instance;
+    protected $db_instance = NULL;
     // 构造的查询语句
-    protected $statement;
+    protected $statement = '';
     // where语句
     protected $where = '';
     // 保存的order by语句
@@ -41,7 +41,7 @@ class Moo
     /**
      * 获得上一条执行语句的id
      */
-    protected function lastInsertId(){
+    public function lastInsertId(){
         return $this->db_instance->lastInsertId();
     }
 
@@ -85,7 +85,7 @@ class Moo
                 $creat_where = '`'.$arg1.'` '.$arg2. ' ('. implode(',', $in_arr). ')';
             } elseif ($sign == 'between' || $sign=='not between' ) {
                 // BETWEEN 处理
-                $creat_where = '`'.$arg1.'` '.$arg2.' '.$this->pdoBind('wh', $arg3[0]);    //. $this->Pdo_bind_count. ' and :wh';
+                $creat_where = '`'.$arg1.'` '.$arg2.' '.$this->pdoBind('wh', $arg3[0]);
                 $creat_where .= ' and '. $this->pdoBind('wh', $arg3[1]);
             } else {
                 throw new Exception("不允许的sql符号", "<b>$arg2</b>");
@@ -217,9 +217,6 @@ class Moo
      */
     protected function bind_prpr()
     {
-        echo "$this->statement <br>";
-        print_r($this->Pdo_bind_data);
-        echo "<br><br>";
         $sta = $this->db_instance->prepare($this->statement);
 
         if (count($this->Pdo_bind_data)) {
