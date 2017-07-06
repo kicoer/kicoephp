@@ -3,9 +3,7 @@ namespace app\controller;
 
 use \kicoe\Core\Controller;
 use \kicoe\Core\Query;
-use \kicoe\Core\Cache;
 use \app\model\Article;
-use \app\model\Tags;
 
 class Index extends Controller
 {

@@ -18,7 +18,7 @@ class Db
     {
         //单例模式下只使用一个数据库连接
         if(is_null(self::$instance)){ 
-            $db_config = Config::config_prpr('db');
+            $db_config = Config::prpr('db');
             try {
                 $dsn = "mysql:host=". $db_config['hostname']. ";dbname=". $db_config['database']. ";charset=utf8";
                 self::$instance = new PDO($dsn, $db_config['username'], $db_config['password'], array(PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC));

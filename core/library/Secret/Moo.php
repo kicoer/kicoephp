@@ -76,22 +76,22 @@ class Moo
             $sign = strtolower($arg2);
             if (in_array($sign, ['=','!=','<>','<','>','<=','>=','like','not like'])) {
                 $creat_where = '`'.$arg1.'` '.$arg2.' '. $this->pdoBind('wh', $arg3);
-            } elseif ($sign == 'in' || $sign =='not in' ) {
+            } elseif ( $sign == 'in' || $sign == 'not in' ) {
                 // IN 与 NOT IN 处理
                 $in_arr = [];
                 foreach ($arg3 as $in_key => $in_val) {
                     $in_arr[] = ' '. $this->pdoBind('wh', $in_val);
                 }
                 $creat_where = '`'.$arg1.'` '.$arg2. ' ('. implode(',', $in_arr). ')';
-            } elseif ($sign == 'between' || $sign=='not between' ) {
+            } elseif ( $sign == 'between' || $sign == 'not between' ) {
                 // BETWEEN 处理
                 $creat_where = '`'.$arg1.'` '.$arg2.' '.$this->pdoBind('wh', $arg3[0]);
                 $creat_where .= ' and '. $this->pdoBind('wh', $arg3[1]);
             } else {
-                throw new Exception("不允许的sql符号", "<b>$arg2</b>");
+                throw new Exception("不允许的sql符号", "sql : <b>$arg2</b>");
             }
         }
-        $this->where .= ($start_where.$creat_where);
+        $this->where .= ($start_where. $creat_where);
     }
       
     /**

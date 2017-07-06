@@ -59,15 +59,15 @@ class Model extends Moo
         $this->resetV();
         if ($data !== NULL) {
             // and | or
-            $con_token = '';
+            $con_token = 'and';
             foreach ($data as $value) {
                 switch (count($value)) {
                     case 1:
-                        # 为1时，为and 或 or
+                        # 为1时，and 或 or
                         $con_token = $value;
                         break;
                     case 2:
-                        # 为2是，还是默认=的数组
+                        # 为2时，默认=的数组
                         $this->wh($value[0], $value[1], False, $con_token);
                         break;
                     case 3:

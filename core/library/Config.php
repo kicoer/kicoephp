@@ -5,7 +5,7 @@ namespace kicoe\Core;
 class Config
 {
 
-    private static $config = NULL;
+    private static $config = [];
 
     /**
      * 解析配置文件
@@ -13,11 +13,11 @@ class Config
      * @param string $path 配置文件路径
      * @return array 配置信息
      */
-    public static function config_prpr($type, $path = 'config.php')
+    public static function prpr($type, $path = 'config.php')
     {
-        if (self::$config == NULL) {
-            self::$config = include APP_PATH.$path;
+        if ( !isset(self::$config[$path]) ) {
+            self::$config[$path] = include APP_PATH.$path;
         }
-        return self::$config[$type];
+        return self::$config[$path][$type];
     }
 }

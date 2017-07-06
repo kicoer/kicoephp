@@ -44,7 +44,7 @@ class Route{
     {
         $url = trim($url,'/');
         $urlArray = explode('/', $url);
-        $route_conf = Config::config_prpr('route');
+        $route_conf = Config::prpr('route');
         $route_action = isset($urlArray[1])?$urlArray[1]:'index';
         if( isset($route_conf) && array_key_exists($urlArray[0].'/'.$route_action, $route_conf) ) {
             // 从匹配的路由表中匹配
