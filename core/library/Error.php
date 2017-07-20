@@ -3,7 +3,7 @@ namespace kicoe\Core;
 
 use \kicoe\Core\Exception;
 
-//错误处理类
+// 错误处理类
 class Error
 {
     /**
@@ -32,7 +32,7 @@ class Error
      */
     public static function onlymy_error_handler($error_level, $error_message, $error_file, $error_line, $error_context)
     {
-        throw new Exception('系统错误 s:',$error_message,$error_file,$error_line);
+        throw new Exception('系统错误 : ',$error_message,$error_file,$error_line);
     }
 
     /**
@@ -42,8 +42,8 @@ class Error
     public static function onlymy_shutdown_handler()
     {
         if (!is_null($error = error_get_last()) && in_array($error['type'], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE])) {
-            $Exc_instance = new Exception('致命错误 t:'.$error['type'], $error['message'], $error['file'],$error['line']);
-            //翻了下tp源码，总算知道原来这里的异常得交给别的函数抛出啊
+            $Exc_instance = new Exception('致命错误 : '.$error['type'], $error['message'], $error['file'],$error['line']);
+            // 翻了下tp源码，总算知道原来这里的异常得交给别的函数抛出啊
             self::onlymy_exception_handler($Exc_instance);
         }
     }
@@ -58,7 +58,7 @@ class Error
         if ($e instanceof Exception) {
             $e->show(); 
         } else {
-            $My_exception = new Exception("原生错误 c:".get_class($e), $e->getMessage(), $e->getFile(), $e->getLine());
+            $My_exception = new Exception("原生错误 : ".get_class($e), $e->getMessage(), $e->getFile(), $e->getLine());
             $My_exception->show();
         }
     }

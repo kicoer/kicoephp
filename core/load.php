@@ -1,7 +1,8 @@
 <?php
 // -- 框架加载文件 --
 
-defined('CORE_PATH') or define('CORE_PATH', __DIR__.'/');   //框架核心目录
+// 框架核心目录
+defined('CORE_PATH') or define('CORE_PATH', __DIR__.'/');
 
 // 简单的自动加载
 spl_autoload_register( function($class){

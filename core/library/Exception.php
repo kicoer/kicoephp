@@ -1,10 +1,10 @@
 <?php
 namespace kicoe\Core;
-//自定义异常类
+// 自定义异常类
 
 class Exception extends \Exception
 {
-    //错误信息模板
+    // 错误信息模板
     protected $Exception_tpl_start = '
         <!DOCTYPE html>
         <html>
@@ -32,7 +32,7 @@ class Exception extends \Exception
         </html>
     ';
 
-    //报错类型
+    // 报错类型
     protected $Exc_type;
 
     /**
@@ -54,7 +54,7 @@ class Exception extends \Exception
         parent::__construct($message, $code, $previous);
     }
 
-    //用于显示错误的页面信息
+    // 用于显示错误的页面信息
     public function show()
     {
         header("HTTP/1.1 500 $this->message");

@@ -6,18 +6,17 @@ use \kicoe\Core\Exception;
 use \PDO;
 
 /**
- * Db数据库链接的单例
- * 
+ * MYSQL数据库链接的单例
  */
 class Db
 {
-    //自身实例
+    // 自身实例
     private static $instance;
 
     public static function connect()
     {
-        //单例模式下只使用一个数据库连接
-        if(is_null(self::$instance)){ 
+        if(is_null(self::$instance)){
+            // PDO
             $db_config = Config::prpr('db');
             try {
                 $dsn = "mysql:host=". $db_config['hostname']. ";dbname=". $db_config['database']. ";charset=utf8";

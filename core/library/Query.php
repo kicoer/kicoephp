@@ -7,7 +7,7 @@ use \kicoe\Core\Exception;
 
 /**
 * 数据库的查询构造器
-* 要优雅，不要污
+* 要优雅
 */
 class Query extends Moo
 {

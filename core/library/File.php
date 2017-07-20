@@ -72,6 +72,7 @@ class File extends SplFileInfo{
     /**
      * 拷贝函数
      * @param string $save 复制文件路径与名称
+     * @return File object
      */
     public function CP($save)
     {
