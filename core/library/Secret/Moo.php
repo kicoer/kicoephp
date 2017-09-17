@@ -249,7 +249,11 @@ class Moo
                 if (is_numeric($key)) {
                     $key++;
                 }
-                $sta->bindValue($key,$value);
+                if (is_numeric($value)) {
+                    $sta->bindValue($key,$value,\PDO::PARAM_INT);
+                } else {
+                    $sta->bindValue($key,$value);
+                }
             }
         }
         $sta->execute();
