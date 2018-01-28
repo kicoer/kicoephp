@@ -5,7 +5,8 @@
 defined('CORE_PATH') or define('CORE_PATH', __DIR__.'/');
 
 // 简单的自动加载
-spl_autoload_register( function($class){
+// app -> app kicoe/core ->core
+spl_autoload_register( function ($class) {
     $prefix = substr($class, 0, 3);
     if ($prefix == 'app') {
         $file = APP_PATH. str_replace('\\', '/', substr($class, 4)). '.php';
@@ -19,8 +20,15 @@ spl_autoload_register( function($class){
     }
 } );
 
-// 注册错误和异常处理，正式环境下请注释掉这一行
-\kicoe\Core\Error::register();
+use kicoe\Core\Config;
+use kicoe\Core\Error;
+use kicoe\Core\Request;
+
+// 加载配置文件
+Config::load(APP_PATH.'config.php');
+
+// 是否开启报错
+Config::prpr('test') && Error::register();
 
 // --link start--  
-\kicoe\Core\Link::start();
+Request::getInstance()->route();

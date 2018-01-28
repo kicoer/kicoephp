@@ -1,12 +1,9 @@
 <?php
-
-/*
- * 简单的路由处理类
- */
+// 简单的路由处理类
 
 namespace kicoe\Core;
 
-use \kicoe\Core\Request;
+use kicoe\Core\Request;
 use \ReflectionClass;
 
 class Route{
@@ -42,25 +39,77 @@ class Route{
      */
     public static function init($url)
     {
-        $url = trim($url,'/');
-        $urlArray = explode('/', $url);
         $route_conf = Config::prpr('route');
-        $route_action = isset($urlArray[1])?$urlArray[1]:'index';
-        if( isset($route_conf) && array_key_exists($urlArray[0].'/'.$route_action, $route_conf) ) {
-            // 从匹配的路由表中匹配
-            $sele_conf = explode('/', $route_conf[$urlArray[0].'/'.$route_action]);
-            self::$controller = ucfirst($sele_conf[0]);
-            self::$action = $sele_conf[1];
+        $url = trim($url,'/');
+        if ($route_conf === []) {
+            // 配置为空则自动路由
+            $k_arr = explode('/', $url);
+            self::$controller = ucfirst($k_arr[0]);
+            self::$action = isset($k_arr[1])?$k_arr[1]:'index';
+            if ( isset($k_arr[2]) ) {
+                self::$query = array_slice($k_arr,2);
+            }
         } else {
-            // 将控制器首字母转换大写
-            self::$controller = ucfirst($urlArray[0]);
-            // 获取动作名
-            self::$action = isset($urlArray[1]) ? $urlArray[1] : 'index';
+            // 完全按照配置来
+            $key = 'route.cache.php';
+            if (Cache::has($key) && !Config::prpr('test')) {
+                $route_cache = Cache::read($key);
+            } else {
+                $route_cache = self::tree($route_conf);
+                Cache::write($key, $route_cache);
+            }
+            // 解析路由
+            for ($i=0; $i < strlen($url); $i++) { 
+                $route_cache = $route_cache[$url[$i]];
+                if (is_string($route_cache)) {
+                    $ac = explode('@', $route_cache);
+                    break;
+                }
+            }
+            self::$controller = ucfirst($ac[0]);
+            self::$action = $ac[1];
+            // 解析参数
+            if ($qu_str = substr($url, $i+2)) {
+                if ($qu_arr = explode('/', $qu_str)) {
+                   self::$query = $qu_arr;
+                }
+            }
         }
-        //获取URL参数
-        if ( isset($urlArray[2]) ) {
-            self::$query = array_slice($urlArray,2);
-        }        
+    }
+
+    /**
+     * 将路由配置缓存为树
+     */
+    public static function tree($conf)
+    {
+        $tree = [];
+        $len = 0;
+        foreach (array_keys($conf) as $key => $value) { 
+            if (strlen($value) > $len) {
+                $len = strlen($value);
+            }
+        }
+        // route_index => tree_index
+        $index_list = [];
+        for ($i=0; $i<$len; $i++) {
+            $ki = 0;
+            foreach ($conf as $key => $value) {
+                if (isset($key[$i])) {
+                    if (!isset($index_list[$ki])) {
+                        $index_list[$ki] = &$tree;
+                    }
+                    if (!isset($index_list[$ki][$key[$i]])) {
+                        $index_list[$ki][$key[$i]] = [];
+                    }
+                    $index_list[$ki] = &$index_list[$ki][$key[$i]];
+                    if (strlen($key) === $i+1) {
+                        $index_list[$ki] = $value;
+                    }
+                }
+                $ki++;
+            }
+        }
+        return $tree;
     }
 
     /**

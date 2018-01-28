@@ -1,9 +1,10 @@
 <?php
+// 错误处理类
+
 namespace kicoe\Core;
 
-use \kicoe\Core\Exception;
+use kicoe\Core\Exception;
 
-// 错误处理类
 class Error
 {
     /**
@@ -58,8 +59,7 @@ class Error
         if ($e instanceof Exception) {
             $e->show(); 
         } else {
-            $My_exception = new Exception("原生错误 : ".get_class($e), $e->getMessage(), $e->getFile(), $e->getLine());
-            $My_exception->show();
+            (new Exception("原生错误 : ".get_class($e), $e->getMessage(), $e->getFile(), $e->getLine()))->show();
         }
     }
 

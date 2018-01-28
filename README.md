@@ -2,11 +2,11 @@
 
 ## 关于
 
-超级小巧简单的phpMVC框架，用来搭博客的
+超级小巧简单的PHP框架，用来搭博客的
 
 依赖：
 
-* php >= 5.4
+* PHP >= 5.4
 * PDO
 
 ## 结构
@@ -29,13 +29,15 @@
 ## 使用
 
 #### nginx
-页面链接重定向`index.php?k=`，nginx配置如下：
+页面链接重定向至`index.php?k=`，nginx配置如下：
 ```
+# 这里设置为框架public文件夹路径
+root /www/kicoephp/public
 location / {
+    // 文件不存在时重定向
     try_files $uri $uri/ /index.php?k=$uri;
 }
 ```
-再将网站的根目录设置为public文件夹路径
 #### 配置文件
 位于app目录下的 `config.php` 填上自己的数据库与路由配置吧
 ```php
@@ -45,19 +47,21 @@ return [
         // 服务器地址
         'hostname'    => 'localhost',
         // 数据库名
-        'database'    => '',
+        'database'    => 'blog',
         // 数据库用户名
-        'username'    => '',
+        'username'    => 'kicoe',
         // 数据库密码
-        'password'    => ''
+        'password'    => 'kicoephp'
     ],
-    // 路由配置
+    // 路由配置,设置为[]则自动路由
     'route' => [
-        // 将i/i操作指向index/index操作
-        'i/i' => 'index/index',
-        // 将link指向index/link
-        'link/index' => 'index/link'
-    ]
+        'i' => 'index@index',
+        'a' => 'index@article'
+    ],
+    // 缓存或日志文件目录,APP_PATH.'cc'确保可写
+    'cc' => 'cc',
+    // false关闭测试，将不会开启路由缓存和报错
+    'test' => true
 ];
 ```
 #### M  （模型）
@@ -75,17 +79,17 @@ class Index extends Controller
     {
         // 向user表插入数据
         Query::table('user')->insert(['username'=>'ll', 'password'=>'***']);
-        Query::table('user')->insert(['username', 'password'], [ ['11','***'], [12,'..'] ]);
+        Query::table('user')->insert(['username', 'password'], [ ['11', '***'], [12, '..'] ]);
         // 向user表删除数据
         Query::table('user')->where('username', '=', 'kicoe')->delete();
         // 查找user表中`username`='kicoe'的字段数据中id的值
-        Query::table('user')->where('username','kicoe')->select('id');
-        // 查找user表中`username`为'kicoe'或'admin'的字段数据中所有值，结果为id=>*的关联数组
+        Query::table('user')->where('username', 'kicoe')->select('id');
+        // 查找user表中`username`为'kicoe'或'admin'的字段数据中所有值，结果为[id=>*]的关联数组
         Query::table('user')->where('username', 'in', ['kicoe', 'admin'])->select('*', 'id');
         // 修改user表中所有`id`小于10的statu字段为0
-        Query::table('user')->where('id','<',10)->update(['statu'=>0]);
+        Query::table('user')->where('id', '<', 10)->update(['statu'=>0]);
       	// 关于orwhere的正确用法 `username`='admin' or `username`='kicoe'
-        Query::table('user')->where('username','admin')->orwhere('username','kicoe')->select('*');
+        Query::table('user')->where('username', 'admin')->orwhere('username', 'kicoe')->select('*');
     }
 }
 ```
@@ -130,7 +134,7 @@ class Index extends Controller
         $user->password = sha1('pa');
         $user->insert();
         // 当然insert可以像查询构造器那样传入参数
-        $user->insert(['name','passwd'], [['kicoe',sha1('pa')], ['poi',sha1('pom')]] );
+        $user->insert(['name','passwd'], [['kicoe',sha1('pa')], ['poi', sha1('pom')]] );
         // 使用set构造where, 要优雅？
         $user->set([['id', 'not between', [1, 5]], 'or', ['name','kicoe'], ['password',sha1('pa')]]);
         // set清空
@@ -147,18 +151,18 @@ class Index extends Controller
 模型与查询构造器都可以使用
 ```php
 // 构造order by与limit
-order('列名','desc / asc');
+order('列名', 'desc / asc');
 limit($i,$n);
 // 自定义查询
-query('select * from user where id = ?',[$id]);
+query('select * from user where id = ?', [$id]);
 // 自定义执行
-execute('select * from user where id = ?',[$id]);
+execute('select * from user where id = ?', [$id]);
 // 返回上一条执行语句的id
 lastInsertId()
 // select的第二个参数可以返回以该参数为键的关联数组哦
 ```
 #### V  （视图）
-在 `app/view` 中定义 `Controller/action.php`
+在 `app/view` 中定义 `Controller_name/action_name.php`
 写php就可以了
 #### C  （控制器）
 以上模型的例子里就用到了控制器，定义在`app/controller`中，控制器名大写且与类名一致

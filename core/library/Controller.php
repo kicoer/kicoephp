@@ -1,9 +1,10 @@
 <?php
 //所有控制器类基类
+
 namespace kicoe\Core;
 
-use \kicoe\Core\View;
-use \kicoe\Core\Request;
+use kicoe\Core\View;
+use kicoe\Core\Request;
 
 class Controller
 {
@@ -11,7 +12,7 @@ class Controller
     protected $view;
 
     //需要传递给视图的值
-    protected $variables = array();
+    protected $var = array();
 
     public function __construct()
     {
@@ -26,9 +27,9 @@ class Controller
     public function assign($name='', $value='')
     {
         if($value == ''){
-            $this->variables = array_merge($this->variables,$name);
+            $this->var = array_merge($this->var, $name);
         } else {
-            $this->variables[$name] = $value;
+            $this->var[$name] = $value;
         }
     }
 
@@ -40,12 +41,11 @@ class Controller
     {
         if ($path === '') {
             // 获取控制器和操作名
-            $controller = Request::getInstance()->getController();
-            $action = Request::getInstance()->getAction();
-            $this->view->show($controller.'/'.$action,$this->variables);
+            $re = Request::getInstance();
+            $this->view->show($re->getController().'/'.$re->getAction(), $this->var);
         } else {
             // 加载自定义页面
-            $this->view->show($path,$this->variables);
+            $this->view->show($path,$this->var);
         }
     }
 

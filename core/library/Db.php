@@ -1,22 +1,25 @@
 <?php
+// Mysql连接单例
+
 namespace kicoe\Core;
 
-use \kicoe\Core\Config;
-use \kicoe\Core\Exception;
+use kicoe\Core\Config;
+use kicoe\Core\Exception;
 use \PDO;
 
-/**
- * MYSQL数据库链接的单例
- */
 class Db
 {
-    // 自身实例
+    // PDO连接对象
     private static $instance;
 
+    /**
+     * 返回Pdo连接对象函数
+     * @return obj PDO连接对象
+     */
     public static function connect()
     {
         if(is_null(self::$instance)){
-            // PDO
+            // PDO config
             $db_config = Config::prpr('db');
             try {
                 $dsn = "mysql:host=". $db_config['hostname']. ";dbname=". $db_config['database']. ";charset=utf8";
@@ -27,5 +30,5 @@ class Db
         }
         return self::$instance;
     }
-
 }
+

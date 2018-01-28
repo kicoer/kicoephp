@@ -1,14 +1,14 @@
 <?php
+// 数据查询的父类
+
 namespace kicoe\Core\Secret;
 
-use \kicoe\Core\Exception;
-use \kicoe\Core\Db;
+use kicoe\Core\Exception;
+use kicoe\Core\Db;
 
-/**
-* 数据查询的父类
-*/
 class Moo
 {
+    // 表名
     protected $table = '';
     // 数据库链接实例
     protected $db_instance = NULL;
@@ -40,6 +40,7 @@ class Moo
 
     /**
      * 获得上一条执行语句的id
+     * @return int 上一条操作数的主键值
      */
     public function lastInsertId(){
         return $this->db_instance->lastInsertId();
@@ -53,52 +54,54 @@ class Moo
      */
     protected function pdoBind($pre, $data)
     {
-        $pre_name = ':'. $pre;
+        $pre_name = ':'.$pre;
         $this->Pdo_bind_count++;
         $this->Pdo_bind_data[ $pre_name. $this->Pdo_bind_count] = $data;
-        return $pre_name. $this->Pdo_bind_count;
+        return $pre_name.$this->Pdo_bind_count;
     }
 
     /**
      * 构造where
+     * @param string $arg1 操作数1
+     * @param string $arg2 链接符 | =操作数2
+     * @param string $arg3 操作数2 | false
      * @param string $in 'or' | 'and'
      */
     protected function wh($arg1, $arg2, $arg3, $in)
     {
-        if ($this->where == '') {
+        if ($this->where === '') {
             $start_where = 'where ';
         } else {
             $start_where = ' '.$in.' ';
         }
-        if ($arg3 == False) {
-            $creat_where = '`'.$arg1.'` = '. $this->pdoBind('wh', $arg2);
+        if ($arg3 === false) {
+            $creat_where = '`'.$arg1.'` = '.$this->pdoBind('wh', $arg2);
         } else {
             $sign = strtolower($arg2);
             if (in_array($sign, ['=','!=','<>','<','>','<=','>=','like','not like'])) {
                 $creat_where = '`'.$arg1.'` '.$arg2.' '. $this->pdoBind('wh', $arg3);
-            } elseif ( $sign == 'in' || $sign == 'not in' ) {
+            } elseif ( $sign === 'in' || $sign === 'not in' ) {
                 // IN 与 NOT IN 处理
                 $in_arr = [];
                 foreach ($arg3 as $in_key => $in_val) {
-                    $in_arr[] = ' '. $this->pdoBind('wh', $in_val);
+                    $in_arr[] = ' '.$this->pdoBind('wh', $in_val);
                 }
-                $creat_where = '`'.$arg1.'` '.$arg2. ' ('. implode(',', $in_arr). ')';
-            } elseif ( $sign == 'between' || $sign == 'not between' ) {
+                $creat_where = '`'.$arg1.'` '.$arg2.' ('. implode(',', $in_arr).')';
+            } elseif ( $sign === 'between' || $sign === 'not between' ) {
                 // BETWEEN 处理
-                $creat_where = '`'.$arg1.'` '.$arg2.' '.$this->pdoBind('wh', $arg3[0]);
-                $creat_where .= ' and '. $this->pdoBind('wh', $arg3[1]);
+                $creat_where = '`'.$arg1.'` '.$arg2.' '.$this->pdoBind('wh', $arg3[0]).' and '.$this->pdoBind('wh', $arg3[1]);
             } else {
                 throw new Exception("不允许的sql符号", "sql : <b>$arg2</b>");
             }
         }
-        $this->where .= ($start_where. $creat_where);
+        $this->where .= ($start_where.$creat_where);
     }
       
     /**
      * 构造order by语句
      * @param string $by 要排序的列
      * @param string $type asc/desc 排序手段
-     * @param obj 自身实例
+     * @return obj 自身实例
      */
     public function order($by, $type = 'asc')
     {
@@ -121,8 +124,8 @@ class Moo
      */
     public function limit($index, $number)
     {
-        $this->limit = ' limit '. $this->pdoBind('li', $index);
-        $this->limit .= (','. $this->pdoBind('li', $number));
+        $this->limit = ' limit '.$this->pdoBind('li', $index);
+        $this->limit .= (','.$this->pdoBind('li', $number));
         return $this;
     }
 
@@ -134,19 +137,19 @@ class Moo
     public function select($data = '*', $key = '')
     {
         if ($key && '*' != $data) {
-                $data = $key . ',' . $data;
+            $data = $key.','.$data;
         }
         //构造查询变量
         if (is_array($data)) {
-            $select = "select ".implode(',', $data);
+            $select = 'select '.implode(',', $data);
         } else {
-            $select = "select ".$data;
+            $select = 'select '.$data;
         }
-        $this->statement = "$select from $this->table ". $this->where. $this->Order_by. $this->limit;
+        $this->statement = $select.' from '.$this->table.' "'.$this->where.$this->Order_by.$this->limit;
         if ($key) {
-            return $this->bind_prpr()->fetchAll(\PDO::FETCH_UNIQUE | \PDO::FETCH_ASSOC);
+            return $this->bindPrpr()->fetchAll(\PDO::FETCH_UNIQUE | \PDO::FETCH_ASSOC);
         } else {
-            return $this->bind_prpr()->fetchAll();
+            return $this->bindPrpr()->fetchAll();
         }
     }
 
@@ -157,8 +160,8 @@ class Moo
     public function delete()
     {
         //没有执行where就delete,则删除全部表
-        $this->statement = "delete from `$this->table` ". $this->where. $this->Order_by. $this->limit;
-        return $this->bind_prpr()->rowCount();
+        $this->statement = 'delete from `'.$this->table.'` '.$this->where.$this->Order_by.$this->limit;
+        return $this->bindPrpr()->rowCount();
     }
 
     /**
@@ -176,7 +179,7 @@ class Moo
                 $begin[] = '`'.$k.'`';
                 $end[] .= $this->pdoBind('in', $v);
             }
-            $insert = "(". implode(',', $begin).") values (". implode(',', $end).")";
+            $insert = '('.implode(',', $begin).') values ('.implode(',', $end).')';
         } else {
             $begin = $data;
             $end = array();
@@ -188,10 +191,10 @@ class Moo
                 $end[] = '('.implode(',', $end_l).')';
 
             }
-            $insert = "(". implode(',', $begin).") values ". implode(',', $end);
+            $insert = '('.implode(',', $begin).') values '.implode(',', $end);
         }
-        $this->statement = "insert into $this->table $insert";
-        return $this->bind_prpr()->rowCount();
+        $this->statement = 'insert into '.$this->table.' '.$insert;
+        return $this->bindPrpr()->rowCount();
     }
 
     /**
@@ -203,19 +206,19 @@ class Moo
     {
         $fields = array();
         foreach ($data as $key => $value) {
-            $fields[] = "`$key` = ". $this->pdoBind('up', $value);
+            $fields[] = '`'.$key'`'.' = '.$this->pdoBind('up', $value);
         }
         $update = implode(',', $fields);
         # 没有where的话,修改所有数据
-        $this->statement = "update `$this->table` set $update ". $this->where. $this->Order_by. $this->limit;
-        return $this->bind_prpr()->rowCount();
+        $this->statement = 'update `'.$this->table'` set $update '.$this->where.$this->Order_by.$this->limit;
+        return $this->bindPrpr()->rowCount();
     }
 
     /**
      * 执行参数绑定
-     * @return PDO 查询结果后对象实例
+     * @return PDO 查询对象
      */
-    protected function bind_prpr()
+    protected function bindPrpr()
     {
         $sta = $this->db_instance->prepare($this->statement);
 
@@ -239,6 +242,9 @@ class Moo
 
     /**
      * 自定义查询
+     * @param string $stat 查询语句
+     * @param array|NULL $data 绑定数据
+     * @param obj PDO查询对象
      */
     private static function ex($stat, $data){
         //获取数据库连接实例
@@ -271,18 +277,19 @@ class Moo
      * @param array $bind_arg 参数绑定数组
      * @return array 返回查询结果数组
      */
-    public static function query($my_statement,$bind_arg = NULL)
+    public static function query($my_statement, $bind_arg = NULL)
     {
         $sta = self::ex($my_statement, $bind_arg);
         return $sta->fetchAll();
     }
+
     /**
      * 自定义查询，支持参数绑定
      * @param string $my_statement 自定义查询语句
      * @param array $bind_arg 参数绑定数组
      * @return int 返回影响行数
      */
-    public static function execute($my_statement,$bind_arg = NULL)
+    public static function execute($my_statement, $bind_arg = NULL)
     {
         $sta = self::ex($my_statement, $bind_arg);
         return $sta->rowCount();

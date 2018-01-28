@@ -12,9 +12,13 @@ return [
         // 数据库密码
         'password'    => 'kicoephp'
     ],
-    // 路由配置
+    // 路由配置,设置为[]则自动路由
     'route' => [
-        'i/i' => 'index/index',
-        'article/id' => 'index/article',
-    ]
+        'i' => 'index@index',
+        'a' => 'index@article'
+    ],
+    // 缓存或日志文件目录,APP_PATH.'cc'确保可写
+    'cc' => 'cc',
+    // false关闭测试，将不会开启路由缓存和报错
+    'test' => true
 ];

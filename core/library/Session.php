@@ -1,12 +1,10 @@
 <?php
+// Session类
 
 namespace kicoe\Core;
 
 use \kicoe\Core\Exception;
 
-/**
- * Session类，用于管理Session
- */
 class Session
 {
     /**

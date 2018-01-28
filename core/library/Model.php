@@ -1,13 +1,11 @@
 <?php
+// 模型类，简单的ORM
 
 namespace kicoe\Core;
 
-use \kicoe\Core\Db;
-use \kicoe\Core\Secret\Moo;
+use kicoe\Core\Db;
+use kicoe\Core\Secret\Moo;
 
-/**
- * 模型类，简单的ORM
- */
 class Model extends Moo
 {
     // 类名
@@ -45,7 +43,7 @@ class Model extends Moo
         $this->resetV();
         $this->where = ' where '. $pk. ' = '. $this->pdoBind('wh', $val);
         $this->statement = 'select * from '. $this->table. $this->where;
-        $this->_data = $this->bind_prpr()->fetch();
+        $this->_data = $this->bindPrpr()->fetch();
         return $this;
     }
 
@@ -68,7 +66,7 @@ class Model extends Moo
                         break;
                     case 2:
                         # 为2时，默认=的数组
-                        $this->wh($value[0], $value[1], False, $con_token);
+                        $this->wh($value[0], $value[1], false, $con_token);
                         break;
                     case 3:
                         # 为3时，数组第二个元素为判断符

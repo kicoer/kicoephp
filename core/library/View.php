@@ -1,5 +1,6 @@
 <?php
 //视图类
+
 namespace kicoe\Core;
 
 use \kicoe\Core\Exception;
@@ -10,7 +11,8 @@ class View
     protected static $instance;
 
     /**
-     * 获取视图实例
+     * 单例
+     * @return obj 视图自身实例
      */
     public static function getInstance()
     {
@@ -23,18 +25,17 @@ class View
     /**
      * 展示页面
      * @param string $path 自定义加载路径
-     * @param string $variables 传递的变量
+     * @param point $variables 传递的值数组指针
      */
-    public function show($path, $variables)
+    public function show($path, &$variables)
     {
         extract($variables);
         if (file_exists(APP_PATH.'view/'.$path.'.php')) {
             // 加载用户自定义视图路径
             include APP_PATH.'view/'.$path.'.php';
         } else {
-            throw new Exception('视图路径错误',$path.' 视图路径未找到');
+            throw new Exception('视图路径错误：', $path.'未找到');
         }
-
     }
 
 }

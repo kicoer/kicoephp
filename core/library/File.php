@@ -1,8 +1,9 @@
 <?php
 // 文件操作类
+
 namespace kicoe\Core;
 
-use \kicoe\Core\Exception;
+use kicoe\Core\Exception;
 use \SplFileInfo;
 
 class File extends SplFileInfo{
@@ -39,15 +40,15 @@ class File extends SplFileInfo{
     {
         // 验证文件大小 k
         if (isset($this->file_veri['size']) && $this->up_info['size'] > $this->file_veri['size']*1000 ) {
-            throw new Exception("上传文件超出 ", $this->file_veri['size'].'k');
+            throw new Exception("上传文件超出：", $this->file_veri['size'].'k');
         }
         // 验证文件类型
         if (isset($this->file_veri['type']) && ( is_string($this->file_veri['type'])?($this->up_info['type'] != $this->file_veri['type'] ):( !in_array($this->up_info['type'], $this->file_veri['type']) ) ) ) {
-            throw new Exception("上传文件Mime ", '...');
+            throw new Exception("上传文件Mime：", '...');
         }
         // 验证文件后缀
         if (isset($this->file_veri['ext']) && (is_string($this->file_veri['ext'])?( $this->file_veri['ext'] != strtolower(pathinfo($this->up_info['name'], PATHINFO_EXTENSION)) ):(!in_array(strtolower(pathinfo($this->up_info['name'], PATHINFO_EXTENSION)), $this->file_veri['ext'] ))) ) {
-            throw new Exception("上传文件后缀 ", '...');
+            throw new Exception("上传文件后缀：", '...');
         }       
     }
 
@@ -65,7 +66,7 @@ class File extends SplFileInfo{
         if (mkdir($path, 0755, true)) {
             return true;
         } else {
-            throw new Exception("上传文件，目录不可写", $path);
+            throw new Exception("上传文件，目录不可写：", $path);
         }
     }
 
@@ -82,7 +83,7 @@ class File extends SplFileInfo{
             $this->validate();
             $this->checkPath(dirname($save));
             if (!move_uploaded_file($this->getRealPath(), $save)) {
-                throw new Exception("上传文件, CP FAIL", $save);
+                throw new Exception("上传文件, CP FAIL：", $save);
             }
             // 返回移动后的文件实例
             return ( new self($save, $this->up_info) );

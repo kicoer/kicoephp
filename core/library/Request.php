@@ -2,10 +2,9 @@
 
 namespace kicoe\Core;
 
-use \kicoe\Core\Route;
-use \kicoe\Core\Exception;
-use \kicoe\Core\File;
-use \ReflectionClass;
+use kicoe\Core\Route;
+use kicoe\Core\Exception;
+use kicoe\Core\File;
 
 /*
  * 请求类，用于保存客户端请求数据
@@ -70,11 +69,7 @@ class Request
             if (!isset($_GET[$index])) {
                 return false;
             }
-            if (!get_magic_quotes_gpc()) {
-                $this->get[$index] = addslashes($_GET[$index]);
-            } else {
-                $this->get[$index] = $_GET[$index];
-            }
+            $this->get[$index] = $_GET[$index];
         }
         return $this->get[$index];
     }
@@ -90,11 +85,7 @@ class Request
             if (!isset($_POST[$index])) {
                 return false;
             }
-            if (!get_magic_quotes_gpc()) {
-                $this->post[$index] = addslashes($_POST[$index]);
-            } else {
-                $this->post[$index] = $_POST[$index];
-            }
+            $this->post[$index] = $_POST[$index];
         }
         return $this->post[$index];
     }
