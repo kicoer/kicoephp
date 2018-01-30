@@ -1,1 +1,1 @@
-a:2:{s:1:"i";s:11:"index@index";s:1:"a";s:13:"index@article";}
+a:2:{s:5:"index";a:1:{s:1:"/";a:2:{i:0;s:5:"index";i:1;s:5:"index";}}s:3:"art";a:1:{s:2:"id";a:1:{s:1:"/";a:2:{i:0;s:5:"index";i:1;s:7:"article";}}}}

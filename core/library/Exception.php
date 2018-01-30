@@ -65,7 +65,7 @@ class Exception extends \Exception
      */
     public function show()
     {
-       // header("HTTP/1.1 500 $this->message");
+        header("HTTP/1.1 500 $this->message");
         $root_path_len = strlen(substr(CORE_PATH, 0, -6));
         echo self::$Exception_tpl_start.sprintf(self::$Exception_tpl, Moe::em(1), $this->Exc_type, $this->message, substr($this->file, $root_path_len), $this->line);
     }

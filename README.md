@@ -13,6 +13,7 @@
 
 ```
 -app/
+    -cc/            缓存与日志文件
     -controller/    控制器
     -model/         模型
     -view/          视图
@@ -34,7 +35,7 @@
 # 这里设置为框架public文件夹路径
 root /www/kicoephp/public
 location / {
-    // 文件不存在时重定向
+    # 文件不存在时重定向
     try_files $uri $uri/ /index.php?k=$uri;
 }
 ```
@@ -55,8 +56,8 @@ return [
     ],
     // 路由配置,设置为[]则自动路由
     'route' => [
-        'i' => 'index@index',
-        'a' => 'index@article'
+        'index' => 'index@index',
+        'art/id' => 'index@article'
     ],
     // 缓存或日志文件目录,APP_PATH.'cc'确保可写
     'cc' => 'cc',
@@ -70,8 +71,8 @@ return [
 <?php
 namespace app\controller;
 
-use \kicoe\Core\Controller;
-use \kicoe\Core\Query;  //引入数据库查询类
+use kicoe\Core\Controller;
+use kicoe\Core\Query;  //引入数据库查询类
 
 class Index extends Controller
 {
@@ -98,7 +99,7 @@ class Index extends Controller
 <?php
 namespace app\model;
 
-use \kicoe\Core\Model;
+use kicoe\Core\Model;
 
 /**
 * user表的模型类
@@ -117,8 +118,8 @@ class User extends Model
 <?php
 namespace app\controller;
 
-use \kicoe\Core\Controller;
-use \app\model\User;
+use kicoe\Core\Controller;
+use app\model\User;
 class Index extends Controller
 {
     public function index()
@@ -171,7 +172,7 @@ lastInsertId()
 <?php
 namespace app\controller;
 
-use \kicoe\Core\Controller;
+use kicoe\Core\Controller;
 
 class Index extends Controller
 {
@@ -192,10 +193,10 @@ class Index extends Controller
 <?php
 namespace app\controller;
 
-use \kicoe\Core\Controller;
-use \kicoe\Core\Request;
-use \kicoe\Core\Session;
-use \kicoe\Core\File;
+use kicoe\Core\Controller;
+use kicoe\Core\Request;
+use kicoe\Core\Session;
+use kicoe\Core\File;
 
 class Index extends Controller
 {
@@ -208,9 +209,10 @@ class Index extends Controller
         $email = $request->validate('email', ['reg'=>'/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/']);
         $text = $request->validate('comment', ['len'=>444]);
         // session操作
-        Session::set('name','kicoe');
-        if (Session::has('name')) {
-            echo Session::get('name');
+        $session = new Session();
+        $session->set('name','kicoe');
+        if ($session->has('name')) {
+            echo $session->get('name');
         }
         // 返回文件操作类 (继承自SplFileInfo)
         $file = $request->file('file');

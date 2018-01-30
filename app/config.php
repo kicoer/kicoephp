@@ -14,8 +14,8 @@ return [
     ],
     // 路由配置,设置为[]则自动路由
     'route' => [
-        'i' => 'index@index',
-        'a' => 'index@article'
+        'index' => 'index@index',
+        'art/id' => 'index@article'
     ],
     // 缓存或日志文件目录,APP_PATH.'cc'确保可写
     'cc' => 'cc',

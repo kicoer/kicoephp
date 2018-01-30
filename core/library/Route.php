@@ -4,6 +4,7 @@
 namespace kicoe\Core;
 
 use kicoe\Core\Request;
+use kicoe\Core\Exception;
 use \ReflectionClass;
 
 class Route{
@@ -52,62 +53,58 @@ class Route{
         } else {
             // 完全按照配置来
             $key = 'route.cache.php';
-            if (Cache::has($key) && !Config::prpr('test')) {
+            if (!Config::prpr('test') && Cache::has($key)) {
                 $route_cache = Cache::read($key);
             } else {
                 $route_cache = self::tree($route_conf);
                 Cache::write($key, $route_cache);
             }
             // 解析路由
-            for ($i=0; $i < strlen($url); $i++) { 
-                $route_cache = $route_cache[$url[$i]];
-                if (is_string($route_cache)) {
-                    $ac = explode('@', $route_cache);
+            $url_arr = explode('/', $url);
+            foreach ($url_arr as $i => $key) {
+                $route_cache = &$route_cache[$key];
+                if (isset($route_cache['/'])) {
+                    $route_cache = &$route_cache['/'];
                     break;
                 }
             }
-            self::$controller = ucfirst($ac[0]);
-            self::$action = $ac[1];
+            if (!isset($route_cache[0])) {
+                throw new Exception('路由配置/解析失败：', $url);
+            }
+            self::$controller = ucfirst($route_cache[0]);
+            self::$action = ucfirst($route_cache[1]);
             // 解析参数
-            if ($qu_str = substr($url, $i+2)) {
-                if ($qu_arr = explode('/', $qu_str)) {
-                   self::$query = $qu_arr;
-                }
+            if ($qu_arr = array_slice($url_arr, $i+1)) {
+                self::$query = $qu_arr;
             }
         }
     }
 
     /**
-     * 将路由配置缓存为树
+     * 将路由配置解析为树
+     * @param array $conf 配置数组
+     * @return array 转换树结构
      */
     public static function tree($conf)
     {
         $tree = [];
-        $len = 0;
-        foreach (array_keys($conf) as $key => $value) { 
-            if (strlen($value) > $len) {
-                $len = strlen($value);
+        $in_node = &$tree;
+        foreach ($conf as $key => $value) {
+            $ca_list = explode('@', $value);
+            if (count($ca_list)!==2) {
+                throw new Exception('路由配置@解析：', $value);
             }
-        }
-        // route_index => tree_index
-        $index_list = [];
-        for ($i=0; $i<$len; $i++) {
-            $ki = 0;
-            foreach ($conf as $key => $value) {
-                if (isset($key[$i])) {
-                    if (!isset($index_list[$ki])) {
-                        $index_list[$ki] = &$tree;
-                    }
-                    if (!isset($index_list[$ki][$key[$i]])) {
-                        $index_list[$ki][$key[$i]] = [];
-                    }
-                    $index_list[$ki] = &$index_list[$ki][$key[$i]];
-                    if (strlen($key) === $i+1) {
-                        $index_list[$ki] = $value;
-                    }
+            $route_arr = explode('/', trim($key, '/'));
+            foreach ($route_arr as $v) {
+                if (isset($in_node[$v])) {
+                    $in_node = &$in_node[$v];
+                } else {
+                    $in_node[$v] = [];
+                    $in_node = &$in_node[$v];
                 }
-                $ki++;
             }
+            $in_node['/'] = $ca_list;
+            $in_node = &$tree;
         }
         return $tree;
     }
@@ -125,7 +122,7 @@ class Route{
             $params = $actionReflec->getParameters();
             $i = 0;
             $pas = [];
-            // 注入依赖
+            // 注入依赖Request
             foreach ($params as $pa) {
                 if ($class = $pa->getClass()) {
                     if('kicoe\Core\Request' === $class->getName())

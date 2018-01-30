@@ -193,7 +193,7 @@ class Moo
             }
             $insert = '('.implode(',', $begin).') values '.implode(',', $end);
         }
-        $this->statement = 'insert into '.$this->table.' '.$insert;
+        $this->statement = 'insert into `'.$this->table.'` '.$insert;
         return $this->bindPrpr()->rowCount();
     }
 
@@ -206,11 +206,11 @@ class Moo
     {
         $fields = array();
         foreach ($data as $key => $value) {
-            $fields[] = '`'.$key'`'.' = '.$this->pdoBind('up', $value);
+            $fields[] = '`'.$key.'`'.' = '.$this->pdoBind('up', $value);
         }
         $update = implode(',', $fields);
         # 没有where的话,修改所有数据
-        $this->statement = 'update `'.$this->table'` set $update '.$this->where.$this->Order_by.$this->limit;
+        $this->statement = 'update `'.$this->table.'` set $update '.$this->where.$this->Order_by.$this->limit;
         return $this->bindPrpr()->rowCount();
     }
 

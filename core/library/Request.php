@@ -14,9 +14,9 @@ class Request
 {
     protected static $_instance;
 
-    private $get;
+    private $_get;
 
-    private $post;
+    private $_post;
 
     private function __construct(){}
 
@@ -65,13 +65,13 @@ class Request
      */
     public function get($index)
     {
-        if (!isset($this->get[$index])) {
+        if (!isset($this->_get[$index])) {
             if (!isset($_GET[$index])) {
                 return false;
             }
-            $this->get[$index] = $_GET[$index];
+            $this->_get[$index] = $_GET[$index];
         }
-        return $this->get[$index];
+        return $this->_get[$index];
     }
 
     /**
@@ -81,13 +81,13 @@ class Request
      */
     public function post($index)
     {
-        if (!isset($this->post[$index])) {
+        if (!isset($this->_post[$index])) {
             if (!isset($_POST[$index])) {
                 return false;
             }
-            $this->post[$index] = $_POST[$index];
+            $this->_post[$index] = $_POST[$index];
         }
-        return $this->post[$index];
+        return $this->_post[$index];
     }
 
     /**
