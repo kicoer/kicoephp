@@ -37,6 +37,7 @@ class Route{
     /**
      * 初始化路由
      * @param string $url ?k=
+     * @throws
      */
     public static function init($url)
     {
@@ -63,16 +64,16 @@ class Route{
             $url_arr = explode('/', $url);
             foreach ($url_arr as $i => $key) {
                 $route_cache = &$route_cache[$key];
-                if (isset($route_cache['/'])) {
+                if ($i === count($url_arr)-1 || isset($route_cache['/']) && !isset($route_cache[$url_arr[$i+1]])) {
                     $route_cache = &$route_cache['/'];
                     break;
                 }
             }
             if (!isset($route_cache[0])) {
-                throw new Exception('路由配置/解析失败：', $url);
+                throw new Exception('route no find', $url, '..../app/config.php', '[route]');
             }
             self::$controller = ucfirst($route_cache[0]);
-            self::$action = ucfirst($route_cache[1]);
+            self::$action = $route_cache[1];
             // 解析参数
             if ($qu_arr = array_slice($url_arr, $i+1)) {
                 self::$query = $qu_arr;
@@ -84,6 +85,7 @@ class Route{
      * 将路由配置解析为树
      * @param array $conf 配置数组
      * @return array 转换树结构
+     * @throws
      */
     public static function tree($conf)
     {
@@ -92,7 +94,7 @@ class Route{
         foreach ($conf as $key => $value) {
             $ca_list = explode('@', $value);
             if (count($ca_list)!==2) {
-                throw new Exception('路由配置@解析：', $value);
+                throw new Exception('route config export error', $value, '..../app/config.php', '[route]');
             }
             $route_arr = explode('/', trim($key, '/'));
             foreach ($route_arr as $v) {

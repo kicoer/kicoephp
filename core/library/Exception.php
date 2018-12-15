@@ -3,60 +3,64 @@
 
 namespace kicoe\Core;
 
-use kicoe\Core\Secret\Moe;
-
 class Exception extends \Exception
 {
-    // 错误信息模板
-    protected static $Exception_tpl_start = '
+
+    private $ex_tpl_start = '
         <!DOCTYPE html>
         <html>
         <head>
         <meta charset="UTF-8">
-        <title>Ex</title>
+        <title>Exception</title>
         <meta name="robots" content="noindex,nofollow" />
+    ';
+
+    // custom error page html head
+    protected $ex_tpl_head = '
+        <link rel="stylesheet" type="text/css" href="/static/css/main.css">
         <style>
-            *{ font-family: "Microsoft Yahei"; }
-            .er { width:400px;margin:40px auto; }
-            .er div span{ display:block; padding:3px 10px; font-size:13px; color:#FF4040; box-shadow: 0px 1px 0px #ddd;letter-spacing: 1px; }
-            .er div p{ padding:5px 10px; }
-            i{ background-color:#ccc;font-size:12px;margin-right:7px; }
-            em{ display:block;text-align:center;margin-bottom:16px; }
+            .er { width:400px;margin:60px auto; }
+            .er div span{ display:block; padding:15px 10px; font-size:14px; color:#FF4040; box-shadow: 0px 1px 0px #ddd;letter-spacing: 1px; }
+            .er div p{ padding:5px 12px; }
+            em{ font-family:"MS Gothic"; display:block;text-align:center;margin-bottom:16px; }
         </style>
+    ';
+
+    private $ex_tpl_end ='
         </head>
         <body>
-        ';
-    protected static $Exception_tpl ='
         <div class="er">
-            <em>%s</em>
-            <div class="Erro"> <span> 错误类型 </span> <p>%s</p> </div>
-            <div class="Exce"> <span> 异常信息 </span> <p>%s</p> </div>
-            <div class="file"> <span> 引发文件 </span> <p><i>&nbsp;&nbsp;</i>%s</p> </div>
-            <div class="line"> <span> 报错行 </span> <p>%s</p> </div>
+            <div class="type"> <span> type </span> <p>%s</p> </div>
+            <div class="info"> <span> info </span> <p>%s</p> </div>
+            <div class="file"> <span> file </span> <p>%s</p> </div>
+            <div class="line"> <span> line </span> <p>%s</p> </div>
         </div>
         </body>
         </html>
     ';
 
     // 报错类型
-    protected $Exc_type;
+    protected $ex_type;
 
     /**
      * 和原来相比新增一个报错类型
      * 主要构造参数有
      * @param string $file 报错文件名
      * @param int $line 报错行数
-     * @param message 报错信息
+     * @param string message 报错信息
      */
-    public function __construct($type = null, $message = null, $file = null, $line = null, $code = 0, Exception $previous = null)
+    public function __construct(
+        $type = null, 
+        $message = null, 
+        $file = null, 
+        $line = null, 
+        $code = 0, 
+        Exception $previous = null
+    )
     {
-        $this->Exc_type = $type;
-        if ($file !== null) {
-            $this->file = $file;
-        }
-        if ($line !== null) {
-            $this->line = $line;
-        }
+        $this->ex_type = $type;
+        $this->file = $file;
+        $this->line = $line;
         parent::__construct($message, $code, $previous);
     }
 
@@ -66,8 +70,14 @@ class Exception extends \Exception
     public function show()
     {
         header("HTTP/1.1 500 $this->message");
-        $root_path_len = strlen(substr(CORE_PATH, 0, -6));
-        echo self::$Exception_tpl_start.sprintf(self::$Exception_tpl, Moe::em(1), $this->Exc_type, $this->message, substr($this->file, $root_path_len), $this->line);
+
+        echo $this->ex_tpl_start.$this->ex_tpl_head.sprintf(
+            $this->ex_tpl_end, 
+            $this->ex_type, 
+            $this->message, 
+            substr($this->file, strlen(substr(CORE_PATH, 0, -6))), 
+            $this->line
+        );
     }
 
 }

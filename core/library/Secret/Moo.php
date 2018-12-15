@@ -10,8 +10,10 @@ class Moo
 {
     // 表名
     protected $table = '';
-    // 数据库链接实例
-    protected $db_instance = NULL;
+
+    /** @var \PDO */
+    protected $db_instance;
+
     // 构造的查询语句
     protected $statement = '';
     // where语句
@@ -66,6 +68,7 @@ class Moo
      * @param string $arg2 链接符 | =操作数2
      * @param string $arg3 操作数2 | false
      * @param string $in 'or' | 'and'
+     * @throws Exception
      */
     protected function wh($arg1, $arg2, $arg3, $in)
     {
@@ -91,7 +94,7 @@ class Moo
                 // BETWEEN 处理
                 $creat_where = '`'.$arg1.'` '.$arg2.' '.$this->pdoBind('wh', $arg3[0]).' and '.$this->pdoBind('wh', $arg3[1]);
             } else {
-                throw new Exception("不允许的sql符号", "sql : <b>$arg2</b>");
+                throw new Exception('不允许的sql符号', "sql : <b>{$arg2}</b>");
             }
         }
         $this->where .= ($start_where.$creat_where);
@@ -101,13 +104,13 @@ class Moo
      * 构造order by语句
      * @param string $by 要排序的列
      * @param string $type asc/desc 排序手段
-     * @return obj 自身实例
+     * @return $this 自身实例
      */
     public function order($by, $type = 'asc')
     {
         $type = strtolower($type);
-        if ($type == 'asc' || $type == 'desc') {
-            if ($this->Order_by == '') {
+        if ($type === 'asc' || $type === 'desc') {
+            if ($this->Order_by === '') {
                 $this->Order_by = ' order by '.$by.' '.$type;
             } else {
                 $this->Order_by .= (', '.$by.' '.$type);
@@ -120,7 +123,7 @@ class Moo
      * 构造limit语句
      * @param string $index 要开始的位置
      * @param string $number 要获取的数量
-     * @return obj 自身实例
+     * @return $this 自身实例
      */
     public function limit($index, $number)
     {
@@ -132,11 +135,13 @@ class Moo
     /**
      * 从当前条件查询语句
      * @param string $data 要查询的条目。不是数组的话查询这一个
+     * @@param string $key 是否返回关联数组
      * @return array 查询结果
+     * @throws Exception
      */
     public function select($data = '*', $key = '')
     {
-        if ($key && '*' != $data) {
+        if ($key && '*' !== $data) {
             $data = $key.','.$data;
         }
         //构造查询变量
@@ -145,7 +150,7 @@ class Moo
         } else {
             $select = 'select '.$data;
         }
-        $this->statement = $select.' from '.$this->table.' "'.$this->where.$this->Order_by.$this->limit;
+        $this->statement = $select.' from '.$this->table.' '.$this->where.$this->Order_by.$this->limit;
         if ($key) {
             return $this->bindPrpr()->fetchAll(\PDO::FETCH_UNIQUE | \PDO::FETCH_ASSOC);
         } else {
@@ -156,6 +161,7 @@ class Moo
     /**
      * 从当前条件删除语句
      * @return int 删除行数
+     * @throws
      */
     public function delete()
     {
@@ -169,6 +175,7 @@ class Moo
      * @param array $data 要插入的键值对数组/或者键数组
      * @param array $v_data 要插入的值数组
      * @return NULL | int 受影响行数
+     * @throws
      */
     public function insert($data, $v_data = NULL)
     {
@@ -201,6 +208,7 @@ class Moo
      * 更新数据
      * @param array $data 要修改的键值对数组
      * @return int 影响行数
+     * @throws
      */
     public function update($data)
     {
@@ -210,13 +218,14 @@ class Moo
         }
         $update = implode(',', $fields);
         # 没有where的话,修改所有数据
-        $this->statement = 'update `'.$this->table.'` set $update '.$this->where.$this->Order_by.$this->limit;
+        $this->statement = 'update `'.$this->table."` set $update ".$this->where.$this->Order_by.$this->limit;
         return $this->bindPrpr()->rowCount();
     }
 
     /**
      * 执行参数绑定
-     * @return PDO 查询对象
+     * @return \PDOStatement 查询对象
+     * @throws
      */
     protected function bindPrpr()
     {
@@ -233,9 +242,14 @@ class Moo
             }
         }
         $sta->execute();
-        if ($sta->errorCode() != '00000') {
+        if ($sta->errorCode() !== '00000') {
             # 进行错误处理
-            throw new Exception("数据库执行错误", implode('<br>',$sta->errorInfo()));
+            throw new Exception(
+                'sql',
+                implode('<br>', $sta->errorInfo()),
+                static::CLASS,
+                'sql:<br>'.$this->statement
+            );
         }
         return $sta;
     }
@@ -244,31 +258,41 @@ class Moo
      * 自定义查询
      * @param string $stat 查询语句
      * @param array|NULL $data 绑定数据
-     * @param obj PDO查询对象
+     * @param \PDO PDO查询对象
+     * @return \PDOStatement
+     * @throws Exception
      */
     private static function ex($stat, $data){
+
         //获取数据库连接实例
         $db_instance = Db::connect();
         $sta = $db_instance->prepare($stat);
-        if (!is_null($data)) {
+
+        if ($data !== null) {
             foreach ($data as $key => $value) {
                 if (is_numeric($key)) {
                     $key++;
                 }
                 if (is_numeric($value)) {
-                    $sta->bindValue($key,$value,\PDO::PARAM_INT);
+                    $sta->bindValue($key, $value, \PDO::PARAM_INT);
                 } else {
-                    $sta->bindValue($key,$value);
+                    $sta->bindValue($key, $value);
                 }
             }
         }
+
         $sta->execute();
-        if ($sta->errorCode() != '00000') {
+        if ($sta->errorCode() !== '00000') {
             # 进行错误处理
-            throw new Exception("数据库执行错误", implode('<br>',$sta->errorInfo()));
-        } else {
-            return $sta;
+            throw new Exception(
+                'sql',
+                implode('<br>',$sta->errorInfo()),
+                static::CLASS,
+                'sql:<br>'.$sta->statement
+            );
         }
+
+        return $sta;
     }
 
     /**
@@ -276,6 +300,7 @@ class Moo
      * @param string $my_statement 自定义查询语句
      * @param array $bind_arg 参数绑定数组
      * @return array 返回查询结果数组
+     * @throws
      */
     public static function query($my_statement, $bind_arg = NULL)
     {
@@ -288,6 +313,7 @@ class Moo
      * @param string $my_statement 自定义查询语句
      * @param array $bind_arg 参数绑定数组
      * @return int 返回影响行数
+     * @throws
      */
     public static function execute($my_statement, $bind_arg = NULL)
     {

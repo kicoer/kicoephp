@@ -20,15 +20,8 @@ spl_autoload_register( function ($class) {
     }
 } );
 
-use kicoe\Core\Config;
-use kicoe\Core\Error;
-use kicoe\Core\Request;
+// load config
+kicoe\Core\Config::load(APP_PATH.'config.php');
 
-// 加载配置文件
-Config::load(APP_PATH.'config.php');
-
-// 是否开启报错
-Config::prpr('test') && Error::register();
-
-// --link start--  
-Request::getInstance()->route();
+// register exception
+kicoe\Core\Config::prpr('test') && kicoe\Core\Error::register();

@@ -43,7 +43,7 @@ class Query extends Moo
      * 构造orwhere
      * @return 同上
      */
-    public function orwhere($arg1, $arg2, $arg3 = false)
+    public function orWhere($arg1, $arg2, $arg3 = false)
     {
         $this->wh($arg1, $arg2, $arg3, 'or');
         return $this;

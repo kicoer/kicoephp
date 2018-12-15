@@ -26,7 +26,7 @@ class Controller
      */
     public function assign($name='', $value='')
     {
-        if($value == ''){
+        if($value === ''){
             $this->var = array_merge($this->var, $name);
         } else {
             $this->var[$name] = $value;
@@ -35,7 +35,7 @@ class Controller
 
     /**
      * 加载页面
-     * @param string|'' $path  自定义路径或空
+     * @param string $path  自定义路径或空
      */
     public function show($path = '')
     {
@@ -45,8 +45,16 @@ class Controller
             $this->view->show($re->getController().'/'.$re->getAction(), $this->var);
         } else {
             // 加载自定义页面
-            $this->view->show($path,$this->var);
+            $this->view->show($path, $this->var);
         }
+    }
+
+    /**
+     * die
+     */
+    protected function shutdown($str)
+    {
+        die($str);
     }
 
 }

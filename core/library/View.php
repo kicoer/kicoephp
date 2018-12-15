@@ -34,7 +34,7 @@ class View
             // 加载用户自定义视图路径
             include APP_PATH.'view/'.$path.'.php';
         } else {
-            throw new Exception('视图路径错误：', $path.'未找到');
+            throw new Exception('view file not find', $path);
         }
     }
 

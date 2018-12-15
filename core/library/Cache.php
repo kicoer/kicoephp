@@ -13,10 +13,15 @@ class Cache
      * 获取文件全名
      * @param string $key 文件名
      * @return string 文件全路径
+     * @throws
      */
     public static function getFile($key)
     {
-        return APP_PATH.Config::prpr('cc').'/'.$key;
+        $file = APP_PATH.Config::prpr('cc').'/'.$key;
+        if (!is_file($file)) {
+            touch($file, 0755, true);
+        }
+        return $file;
     }
 
     public static function has($key)
@@ -27,7 +32,7 @@ class Cache
     /**
      * 写入缓存.cache
      * @param string $key 缓存key
-     * @param array|obj $data 要序列化的数据
+     * @param array $data 要序列化的数据
      */
     public static function write($key, $data)
     {
@@ -37,7 +42,7 @@ class Cache
     /**
      * 读取缓存.cache
      * @param string $key 缓存key
-     * @return data 缓存数据
+     * @return array 缓存数据
      */
     public static function read($key)
     {

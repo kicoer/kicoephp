@@ -32,9 +32,9 @@ class Moe
      * @param int $type 表情类型
      * @return string 随机表情
      */
-    public static function em($type = false)
+    public static function em($type = 0)
     {
-        if ($type === false) {
+        if ($type === 0) {
             $yu = time()%count(self::$emoticon);
             return self::$emoticon[$yu][time()%count(self::$emoticon[$yu])];
         }
