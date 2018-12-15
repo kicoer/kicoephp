@@ -59,12 +59,16 @@ return [
     // 路由配置,设置为[]则自动路由
     'route' => [
         'index' => 'index@index',
-        'art/id' => 'index@article'
+        'art/id' => 'index@article',
+        // 必须要经过Middleware::auth验证过才可以执行哦
+        'admin' => 'auth|admin@index'
     ],
     // 缓存或日志文件目录,APP_PATH.'cc'确保可写
     'cc' => 'cc',
     // false关闭测试，将不会开启路由缓存和报错
-    'test' => true
+    'test' => true,
+    // 中间件类
+    'middleware' => 'app\Middleware'
 ];
 ```
 #### M  （模型）

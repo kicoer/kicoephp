@@ -9,6 +9,10 @@ use \ReflectionClass;
 
 class Route{
 
+    // 中间件列表
+    // 对了，用swoole载入内存后这一块全要改，当初写的什么蠢代码
+    private static $middleware_list = [];
+
     // 控制器
     private static $controller = 'Index';
     // 操作
@@ -47,7 +51,7 @@ class Route{
             // 配置为空则自动路由
             $k_arr = explode('/', $url);
             self::$controller = ucfirst($k_arr[0]);
-            self::$action = isset($k_arr[1])?$k_arr[1]:'index';
+            self::$action = $k_arr[1];
             if ( isset($k_arr[2]) ) {
                 self::$query = array_slice($k_arr,2);
             }
@@ -72,6 +76,9 @@ class Route{
             if (!isset($route_cache[0])) {
                 throw new Exception('route no find', $url, '..../app/config.php', '[route]');
             }
+            if (isset($route_cache[2])) {
+                self::$middleware_list = $route_cache[2];
+            }
             self::$controller = ucfirst($route_cache[0]);
             self::$action = $route_cache[1];
             // 解析参数
@@ -92,8 +99,17 @@ class Route{
         $tree = [];
         $in_node = &$tree;
         foreach ($conf as $key => $value) {
+            // 中间件列表
+            $mi_list = explode('|', $value);
+            $value = array_pop($mi_list);
             $ca_list = explode('@', $value);
-            if (count($ca_list)!==2) {
+            if (!isset($ca_list[1])) {
+                $ca_list[1] = 'index';
+            }
+            if ($mi_list) {
+                $ca_list[2] = $mi_list;
+            }
+            if (count($ca_list)<2) {
                 throw new Exception('route config export error', $value, '..../app/config.php', '[route]');
             }
             $route_arr = explode('/', trim($key, '/'));
@@ -112,11 +128,31 @@ class Route{
     }
 
     /**
-     * 利用反射执行
+     * 利用反射检查
      */
     public static function reflec()
     {
+
         $controller = 'app\controller\\'. self::$controller;
+        $action = self::$action;
+
+        // 执行中间件
+        if (self::$middleware_list) {
+            $middleware_class_name = Config::prpr('middleware');
+            if (!class_exists($middleware_class_name)) {
+                throw new Exception('middleware', "{$middleware_class_name} class is not exist", 'config.php');
+            }
+            $middleware = new $middleware_class_name();
+            $middleware->request = Request::getInstance();
+            foreach (self::$middleware_list as $mw) {
+                if (!method_exists($middleware, $mw)) {
+                    throw new Exception('middleware', "{$mw} not exist", $middleware_class_name);
+                }
+                if (!$middleware->$mw()) {
+                    throw new Exception('middleware', "{$mw} not pass", "{$controller}::{$action}");
+                }
+            }
+        }
         // 获取控制器类的反射实例
         $controllerReflec = new ReflectionClass($controller);
         if ($controllerReflec->isSubclassOf('kicoe\Core\Controller')) {
@@ -136,8 +172,9 @@ class Route{
                     $i++;
                 }
             }
-            $actionReflec->invokeArgs($controllerReflec->newInstance(), $pas);
+            // 还是不用反射执行吧
+            call_user_func_array([new $controller, $action], $pas);
         }
-    } 
+    }
 
 }
