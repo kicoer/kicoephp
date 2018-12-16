@@ -3,8 +3,6 @@
 
 namespace kicoe\Core;
 
-use kicoe\Core\Config;
-use kicoe\Core\Exception;
 use \PDO;
 
 class Db

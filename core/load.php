@@ -19,9 +19,3 @@ spl_autoload_register( function ($class) {
         require $file;
     }
 } );
-
-// load config
-kicoe\Core\Config::load(APP_PATH.'config.php');
-
-// register exception
-kicoe\Core\Config::prpr('test') && kicoe\Core\Error::register();

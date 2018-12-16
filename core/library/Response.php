@@ -2,7 +2,6 @@
 
 namespace kicoe\Core;
 
-
 class Response
 {
     protected static $_instance;

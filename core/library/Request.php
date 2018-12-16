@@ -2,10 +2,6 @@
 
 namespace kicoe\Core;
 
-use kicoe\Core\Route;
-use kicoe\Core\Exception;
-use kicoe\Core\File;
-
 /*
  * 请求类，用于保存客户端请求数据
  * 也可以设置get/post的过滤器等

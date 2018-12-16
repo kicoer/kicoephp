@@ -5,8 +5,6 @@
 namespace kicoe\Core;
 
 use kicoe\Core\Secret\Moo;
-use kicoe\Core\Db;
-use kicoe\Core\Exception;
 
 class Query extends Moo
 {

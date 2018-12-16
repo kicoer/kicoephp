@@ -3,8 +3,6 @@
 
 namespace kicoe\Core;
 
-use \kicoe\Core\Exception;
-
 class Session
 {
     public static function init()

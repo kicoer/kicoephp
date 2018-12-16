@@ -3,8 +3,6 @@
 
 namespace kicoe\Core;
 
-use \kicoe\Core\Exception;
-
 class View
 {
     //视图实例

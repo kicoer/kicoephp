@@ -22,12 +22,29 @@
     -config.php     配置文件
 -core/
     -library/       框架核心库
-    -load.php       框架加载文件
+    # -load.php       框架加载文件
 -public/
     -static/
     -index.php      入口文件
 ```
 和普通MVC没什么太大区别
+
+## composer安装
+
+```
+composer require kicoe\core
+```
+
+```
+# public/index.php
+// 定义应用入口
+define('APP_PATH', __DIR__ . '/../app/');
+// 定义静态 公开库(当前)
+define('PUB_PATH', __DIR__);
+require 'vendor/autoload.php';
+
+kicoe\core\Load::link_start();
+```
 
 ## 使用
 

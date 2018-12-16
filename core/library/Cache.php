@@ -4,8 +4,6 @@
 
 namespace kicoe\Core;
 
-use kicoe\Core\Config;
-
 class Cache
 {
 

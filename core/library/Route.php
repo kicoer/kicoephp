@@ -3,8 +3,6 @@
 
 namespace kicoe\Core;
 
-use kicoe\Core\Request;
-use kicoe\Core\Exception;
 use \ReflectionClass;
 
 class Route{

@@ -3,7 +3,6 @@
 
 namespace kicoe\Core;
 
-use kicoe\Core\Db;
 use kicoe\Core\Secret\Moo;
 
 class Model extends Moo
