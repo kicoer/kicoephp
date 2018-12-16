@@ -129,6 +129,7 @@ class Route{
 
     /**
      * 利用反射检查
+     * @throws
      */
     public static function reflec()
     {
@@ -143,10 +144,9 @@ class Route{
                 throw new Exception('middleware', "{$middleware_class_name} class is not exist", 'config.php');
             }
             $middleware = new $middleware_class_name();
-            $middleware->request = Request::getInstance();
             foreach (self::$middleware_list as $mw) {
                 if (!method_exists($middleware, $mw)) {
-                    throw new Exception('middleware', "{$mw} not exist", $middleware_class_name);
+                    return;
                 }
                 if (!$middleware->$mw()) {
                     throw new Exception('middleware', "{$mw} not pass", "{$controller}::{$action}");
@@ -154,17 +154,20 @@ class Route{
             }
         }
         // 获取控制器类的反射实例
-        $controllerReflec = new ReflectionClass($controller);
-        if ($controllerReflec->isSubclassOf('kicoe\Core\Controller')) {
-            $actionReflec = $controllerReflec->getMethod(self::$action);
-            $params = $actionReflec->getParameters();
+        $controller_ref = new ReflectionClass($controller);
+        if ($controller_ref->isSubclassOf('kicoe\Core\Controller')) {
+            $action_ref = $controller_ref->getMethod(self::$action);
+            $params = $action_ref->getParameters();
             $i = 0;
             $pas = [];
-            // 注入依赖Request
+            // 注入依赖
             foreach ($params as $pa) {
                 if ($class = $pa->getClass()) {
-                    if('kicoe\Core\Request' === $class->getName())
+                    if ('kicoe\Core\Request' === $class->getName()) {
                         $pas[] = Request::getInstance();
+                    } else if ('kicoe\Core\Response' === $class->getName()) {
+                        $pas[] = Response::getInstance();
+                    }
                 } else {
                     if (isset(self::$query[$i])) {
                         $pas[] = self::$query[$i];

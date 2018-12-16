@@ -61,7 +61,7 @@ class Request
     /**
      * 获取_GET中数据
      * @param string $index _GET数组下标
-     * @return _GET中对应数据
+     * @return string  _GET中对应数据
      */
     public function get($index)
     {
@@ -77,7 +77,7 @@ class Request
     /**
      * 获取_POST中数据
      * @param string $index _POST数组下标
-     * @return _POST中对应数据
+     * @return string _POST中对应数据
      */
     public function post($index)
     {
@@ -95,17 +95,18 @@ class Request
      * @param string $index _POST数组下标
      * @param array $vali_arr 要验证的规则
      * @param NULL / _POST数据
-     * @return 成功验证的数据 / false
+     * @return string
+     * @throws
      */
     public function validate($index, $vali_arr = NULL)
     {
         $post_val = $this->post($index);
         if ($post_val !== false && $vali_arr !== NULL) {
-            if(isset($vali_arr['len']) && strlen(strval($post_val)) > $vali_arr['len']){
-                throw new Exception("字符长度超出 ", 'str overflow : '.$vali_arr['len']);
+            if(isset($vali_arr['len']) && strlen($post_val) > $vali_arr['len']){
+                throw new Exception('string length out', 'str overflow : '.$vali_arr['len']);
             }
             if(isset($vali_arr['reg']) && !preg_match($vali_arr['reg'], $post_val)){
-                throw new Exception("正则匹配失败 ", $vali_arr['reg']);
+                throw new Exception('regular expression fail', $vali_arr['reg']);
             }
         }
         return $post_val;
@@ -118,7 +119,7 @@ class Request
      */
     public function file($name)
     {
-        return (new File($_FILES[$name]["tmp_name"], $_FILES[$name]));
+        return new File($_FILES[$name]['tmp_name'], $_FILES[$name]);
     }
 
 }

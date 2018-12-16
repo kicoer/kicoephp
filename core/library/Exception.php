@@ -71,12 +71,14 @@ class Exception extends \Exception
     {
         header("HTTP/1.1 500 $this->message");
 
-        echo $this->ex_tpl_start.$this->ex_tpl_head.sprintf(
-            $this->ex_tpl_end, 
-            $this->ex_type, 
-            $this->message, 
-            substr($this->file, strlen(substr(CORE_PATH, 0, -6))), 
-            $this->line
+        Response::getInstance()->status('500')->send(
+            $this->ex_tpl_start.$this->ex_tpl_head.sprintf(
+                $this->ex_tpl_end,
+                $this->ex_type,
+                $this->message,
+                substr($this->file, strlen(substr(CORE_PATH, 0, -6))),
+                $this->line
+            )
         );
     }
 

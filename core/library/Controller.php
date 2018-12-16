@@ -3,12 +3,9 @@
 
 namespace kicoe\Core;
 
-use kicoe\Core\View;
-use kicoe\Core\Request;
-
 class Controller
 {
-    //视图类
+    /** @var View */
     protected $view;
 
     //需要传递给视图的值
@@ -36,6 +33,7 @@ class Controller
     /**
      * 加载页面
      * @param string $path  自定义路径或空
+     * @throws
      */
     public function show($path = '')
     {
@@ -49,12 +47,15 @@ class Controller
         }
     }
 
-    /**
-     * die
-     */
-    protected function shutdown($str)
+    public function json($data)
     {
-        die($str);
+        $this->view->json($data);
+    }
+
+
+    protected function shutdown($code = 500, $str = '')
+    {
+        Response::getInstance()->shutdown($code, $str);
     }
 
 }
